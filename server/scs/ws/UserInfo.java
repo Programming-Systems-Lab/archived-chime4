@@ -15,7 +15,7 @@ public class UserInfo extends PersistentObject
 {
    /** authentication status for the user **/
    public boolean authenticated;
-   
+   private int deleteThis;
    /** globally unique for this user **/
    public String username;
    
