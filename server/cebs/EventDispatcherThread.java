@@ -15,30 +15,30 @@ class EventDispatcherThread extends Thread
     /** the blocking queue to remove events from **/
     private BlockingEventQueue incomingEvents;
     
-    /** the event reciever the thread gets EventHandlers from **/
-    private EventReciever eventReciever;
+    /** the event system the thread gets EventHandlers from **/
+    private CebsEventSystem eventSystem;
     
     /**
      * Construct a new EventDispatcherThread.
      *
      * @param blockingQueue the queue to remove incoming events from
-     * @param eventReciever the reciever that contains event handlers
+     * @param eventSystem   the system that contains event handlers
      * @throws IllegalArgumentException
      *         if <code>blockingQueue</code> or <code>eventReciever</code> 
      *         is <code>null</code>
      **/
     EventDispatcherThread(BlockingEventQueue blockingQueue, 
-                          EventReciever eventReciever)
+                          CebsEventSystem eventSystem)
     {
         // check for null
-        if ( (blockingQueue == null) || (eventReciever == null) )
+        if ( (blockingQueue == null) || (eventSystem == null) )
         {
             String msg = "no parameter can be null";
             throw new IllegalArgumentException(msg);
         }
         
         this.incomingEvents = blockingQueue;
-        this.eventReciever = eventReciever;
+        this.eventSystem = eventSystem;
     }
     
     /**
@@ -73,10 +73,11 @@ class EventDispatcherThread extends Thread
                 
                 // get the correct EventHandler listening to this topic
                 // and from this server
-                String topic = event.getTopic();
-                String server = event.getSourceEventServer();
+                String topic = event.getString("xxx.event.topic");
+                String host = event.getString("xxx.event.source.server.host");
+                int port = event.getInteger("xxx.event.source.server.port");
                 EventHandler handler = 
-                    eventReciever.getEventHandler(topic, server);
+                    eventSystem.getEventHandler(host, port, topic);
                 
                 // if there is one, ask the handler to handle it
                 if (handler != null)

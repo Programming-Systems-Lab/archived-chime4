@@ -12,38 +12,6 @@ import java.io.Serializable;
 public abstract class Event implements Serializable
 {   
    /**
-    * Set the CEBS URL that this event is being sent to. This URL must be of
-    * the form <code>cebs://[host]:[port]?topic=[topic]</code> where 
-    * [host]:[port] is the address of the event server and [topic] is the
-    * topic the event will be published on.
-    *
-    * @param cebsURL the CEBS URL that the event will be published to
-    * @throws IllegalArgumentException
-    *         if <code>cebsURL</code> is <code>null</code>
-    **/
-   void setCebsURL(String cebsURL)
-   {
-      // check for null
-      if (cebsURL == null)
-      {
-         String msg = "cannot set null cebs URL";
-         throw new IllegalArgumentException(msg);
-      }
-      
-      put("xxx.cebs.url", cebsURL);
-   }
-   
-   /**
-    * Get the Cebs URL that this event was sent to.
-    *
-    * @return event server that this event was published to
-    **/
-   String getCebsURL()
-   {
-      return getString("xxx.cebs.url");
-   }
-   
-   /**
     * Determine whether an event contains a value mapped to a given key.
     *
     * @param key the key to test for existence
