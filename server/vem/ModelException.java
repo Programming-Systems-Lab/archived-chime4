@@ -20,6 +20,9 @@ public class ModelException extends java.lang.Exception {
     public ModelException() {
     }
     
+    public ModelException(Throwable cause) {
+	super(cause);
+    }
     
     /**
      * Constructs an instance of <code>ModelException</code> with the specified detail message.

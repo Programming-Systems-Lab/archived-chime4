@@ -20,15 +20,17 @@ import psl.chime4.server.vem.util.*;
  */
 public class VisualDataManager {
     
+    private int mUserID;
+    private String mTheme;
+    
+    private ResourceFileManager mFileManager;
     private VemMapDAO mDataStore;
-    public int mUserID;
-    public String mTheme;
     
     /**
      *	Creates a new instance of VisualDataManager
      */
-    public VisualDataManager (DAOFactory iFactory) {
-	VemMapDAO mDataStore = (VemMapDAO) iFactory.getDAO (VemMap.class);
+    public VisualDataManager(DAOFactory iFactory) {
+	VemMapDAO mDataStore = (VemMapDAO) iFactory.getDAO(VemMap.class);
 	mUserID = psl.chime4.server.auth.User.GLOBAL_ID;
 	mTheme = null;
     }
@@ -42,20 +44,24 @@ public class VisualDataManager {
      * @param properties the global properties for the world manager
      * @param logger     if the VDM must do logging it should use this logger
      **/
-    public void initialize (java.util.Map properties,
-    java.util.logging.Logger logger) {
+    public void initialize(java.util.Map properties,
+	java.util.logging.Logger logger) 
+    {
+	mFileManager = ResourceFileManager.getInstance(properties);
     }
     
     /**
      * Begin running. At this point the VDM file should begin running.
      **/
-    public void start () {
+    public void start() {
+	// start any threads here
     }
     
     /**
      * Stop running. At this point the VDM file should be ready to shutdown.
      **/
-    public void stop () {
+    public void stop() {
+	// stop any threads
     }
     
     /**
@@ -66,7 +72,7 @@ public class VisualDataManager {
      *
      * @param properties the global properties object
      **/
-    public void shutdown (java.util.Map properties) {
+    public void shutdown(java.util.Map properties) {
     }
     
     /**
@@ -79,32 +85,57 @@ public class VisualDataManager {
      * @param modelID universally unique ID for an image file
      * @return File corresponding to the given model-ID
      **/
-    public File getModelFile (int modelID) {
-	return null;
+    public File getModelFile(int modelID) {
+	return mFileManager.getResourceFile(modelID).getFile();
     }
-
-    public void setUserID (int userID) {
+    
+    public void setUserID(int userID) {
 	this.mUserID = userID;
     }
-
-    public void setTheme (String themeName) {
+    
+    public void setTheme(String themeName) {
 	this.mTheme = themeName;
     }
-
-    private ResourceFile getResourceFileFor (MetadataWorldObject mdwo)
+    
+    /**
+     *	Performs a change on an instance specific basis.
+     */
+    private void doInstanceViewChange(ChangeViewRequest req) 
     throws DataAccessException {
-	ResourceDescriptor rd = mdwo.getMetadata ();
-	String objectURL = rd.getPath ();
-	String contentType = rd.getContentType ();
-	ResourceFileManager rfm = ResourceFileManager.getInstance ();
-
-	int mappingID, resourceID;
+	
+	String objectURL = null;
+	int mappingID, priority;
 	VemMap vmap;
-
-	mappingID = mDataStore.search (mUserID, objectURL, contentType, VemType.COMPONENT);
-	vmap = (VemMap) mDataStore.load (mappingID);
-	resourceID = vmap.getVemData ().getModelID ();
-
-	return rfm.getResourceFile (resourceID);
+	VemType component = VemType.COMPONENT;
+	
+	// FIXME: get Metadata for req.getObjectID()
+	// objectURL = WorldManager.getObjectForID(req.getObjectID()).getMetadata().getPath()
+	
+	mappingID = mDataStore.search(
+	    (int)req.getUser(), null, objectURL, component);
+	vmap = (VemMap) mDataStore.load(mappingID);
+	
+	// find the model ID's for the given checksum
+	int modelID = mFileManager.getKeyForChecksum(req.getChecksum());
+	
+	if (vmap.isExplicitMap()) {
+	    // change this VemMap to the new model ID
+	    vmap.getVemData().setModelID(modelID);
+	} else {
+	    // create new VemMap
+	    VemData data = new VemData();
+	    data.setImageID(-1);
+	    data.setModelID(modelID);
+	    data.setType(component);
+	    data.setSubType('A');   // FIXME 
+	    
+	    priority = VemMap.EXPLICIT + 
+		(req.isGlobalChange() ? VemMap.GLOBAL_MAP : VemMap.USER_MAP);
+	    
+	    vmap = new VemMap((int)req.getUser(), objectURL, priority, data);
+	}
+	
+	// store it back
+	mDataStore.store(vmap);
     }
 }
