@@ -3,6 +3,14 @@ package psl.chime4.server.vem.util;
 import java.util.Vector;
 import java.io.*;
 
+/**
+ *	Class for extracting vertex information from a 3DS file.
+ *	This code is based on a tutorial written by  by Andrea Ingegneri 
+ *	<code>(http://www.tsrevolution.com/docs/c3ds.zip)</code>
+ *
+ *	@author Vladislav Shchogolev
+ *	@version $Revision$
+ */
 
 public class FileAnalyzer3DS extends FileAnalyzer
 {
@@ -19,21 +27,47 @@ public class FileAnalyzer3DS extends FileAnalyzer
 	// member variables
 	private Vector mVertexList;
 	private Box3D mBoundingBox;
-
+	private float mBoundingVolume;
+	
+	/**
+	 *	Default constructor, takes the name of the file on disk.
+	 *
+	 *	@param	iFilename	the file to analyze
+	 */
 	public FileAnalyzer3DS(String iFilename) throws IOException
 	{
 		super(iFilename);
 		processVertexPoints();
 	}
 
+	/**
+	 *	Returns a vector of vertex objects. These are all the vertices mentioned
+	 *	within the file.
+	 *
+	 *	@returns A vector of Vertex objects, the vertices of this model
+	 */
 	public Vector getVertexList() {
 		return mVertexList;
 	}
 
+	/**
+	 *	Returns a representation of the bounding box for this 3DS file.
+	 *	The <code>Box3D</code> representation is just a pair of opposing vertices
+	 *	of the box.
+	 *
+	 *	@returns the bounding box for this 3D model
+	 */
 	public Box3D getBoundingBox() {
 		return mBoundingBox;
 	}
 
+	/**
+	 *	Returns the volume of the bounding box.
+	 */
+	public float getBoundingVolume() {
+		return mBoundingVolume;
+	}
+	
 	private void processVertexPoints() throws IOException
 	{
 		// little endian version of DataInputStream
@@ -51,7 +85,6 @@ public class FileAnalyzer3DS extends FileAnalyzer
 		min = new Vertex();
 
 		try {
-			
 			while(true)
 			{
 				flag = in.readUnsignedShort();
@@ -110,6 +143,7 @@ public class FileAnalyzer3DS extends FileAnalyzer
 
 		mVertexList = vertexList;
 		mBoundingBox = new Box3D(min, max);
+		mBoundingVolume = Math.abs((min.x-max.x)*(min.y-max.y)*(min.z-max.z));
 	}
 
 	public static void main(String[] args) throws Exception
