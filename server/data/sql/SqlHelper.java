@@ -66,7 +66,8 @@ public class SqlHelper {
 	 * @return the prepared string
 	 */
 	public static String prepareString(String iStr) {
-		return wrapInQuotes(escapeString(iStr));
+	    if (iStr == null) return "NULL";
+	    return wrapInQuotes(escapeString(iStr));
 	}
 
 	/**
