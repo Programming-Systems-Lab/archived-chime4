@@ -12,31 +12,31 @@ package psl.chime4.server.vem;
  */
 
 public class VemType {
-	public static final VemType COMPONENT = new VemType(0);
-	public static final VemType CONTAINER = new VemType(1);
-	public static final VemType CONNECTOR = new VemType(2);
-
-	private int mType;
-
-	private VemType(int iType) {	   // constructor intentionally private
-		mType = iType;
+    public static final VemType COMPONENT = new VemType (0);
+    public static final VemType CONTAINER = new VemType (1);
+    public static final VemType CONNECTOR = new VemType (2);
+    
+    private int mType;
+    
+    private VemType (int iType) {	   // constructor intentionally private
+	mType = iType;
+    }
+    
+    public String toString () {
+	String[] labels = {"Component", "Container", "Connector"};
+	return labels[mType];
+    }
+    
+    public int toInt () {
+	return mType;
+    }
+    
+    public static VemType getTypeForCode (int i) {
+	switch (i) {
+	    case 0: return COMPONENT;
+	    case 1: return CONTAINER;
+	    case 2: return CONNECTOR;
+	    default: return null;
 	}
-
-	public String toString() {
-		String[] labels = {"Component", "Container", "Connector"};
-		return labels[mType];
-	}
-
-	public int toInt() {
-		return mType;
-	}
-	
-	public static VemType getTypeForCode(int i) {
-		switch (i) {
-			case 0: return COMPONENT;
-			case 1: return CONTAINER;
-			case 2: return CONNECTOR;
-			default: return null;
-		}
-	}
+    }
 }
