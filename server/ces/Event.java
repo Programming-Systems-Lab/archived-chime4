@@ -1,6 +1,7 @@
 package psl.chime4.server.ces;
 
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * Defines a basic event. This represents either a change in the state of
@@ -183,4 +184,11 @@ public abstract class Event implements Serializable
     * @param key the value is mapped to in the event
     **/
    public abstract  void remove(String key);
+   
+   /**
+    * Get an enumeration over all the keys in this event.
+    *
+    * @return enumeration all the keys in this event
+    **/
+   public abstract Enumeration keys();
 }

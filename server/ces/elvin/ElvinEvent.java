@@ -4,6 +4,8 @@ import psl.chime4.server.ces.Event;
 
 import org.elvin.je4.Notification;
 
+import java.util.*;
+
 /**
  * Makes an Elvin notification look like a CES Event.
  *
@@ -122,5 +124,20 @@ class ElvinEvent extends Event
     Notification getUnderlyingNotification()
     {
         return notif;
+    }
+    
+    /**
+     * Get an iterator all the keys in this event.
+     *
+     * @return iterator all the keys in this event
+     */
+    public Enumeration keys()
+    {
+       return notif.keys();
+    }
+    
+    public String toString()
+    {
+       return notif.toString();
     }
 }

@@ -21,16 +21,16 @@ class EventDispatcher extends Thread
    /**
     * Construct a new EventDispatcher.
     *
-    * @param eventQueue queue containing incoming events
-    * @param handlerMap multimap containing event handlers
+    * @param eventQueue      queue containing incoming events
+    * @param handlerMultiMap multimap containing event handlers
     * @throws IllegalArgumentException
     *         if any parameter is <code>null</code>
     **/
    public EventDispatcher(EventQueue eventQueue, 
-                          EventHandlerMultiMap handlerMap)
+                          EventHandlerMultiMap handlerMultiMap)
    {
       // check for null
-      if ((eventQueue == null) || (handlerMap == null))
+      if ((eventQueue == null) || (handlerMultiMap == null))
       {
          String msg = "no parameter may be null";
          throw new IllegalArgumentException(msg);
@@ -70,10 +70,15 @@ class EventDispatcher extends Thread
             // remove the next incoming events
             Event event = incomingEvents.getEvent();
             
+            //System.out.println("ED: got event: " + event);
+            
             // get the routing information
             String topic = event.getTopic();
             String host = event.getEventServerHost();
             int port = event.getEventServerPort();
+            
+            //System.out.println("ED: topic=" + topic + ",host=" + host + 
+             //  ",port=" + port);
             
             // make sure the routing information was set
             if ((topic == null) || (host == null) || (port <= 0))
@@ -81,7 +86,7 @@ class EventDispatcher extends Thread
                String msg = "event contained no routing information " + event;
                throw new IllegalStateException(msg);
             }
-            
+
             // get the correct handler
             EventHandler handler = 
                handlerMultiMap.getEventHandler(host, port, topic);

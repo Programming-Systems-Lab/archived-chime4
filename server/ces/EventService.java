@@ -1,6 +1,8 @@
 package psl.chime4.server.ces;
 
 import psl.chime4.server.util.CounterMap;
+import psl.chime4.server.scs.service.*;
+import psl.chime4.server.scs.log.*;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -12,13 +14,13 @@ import java.util.HashMap;
  * @author Azubuko Obele
  * @version 0.1
  **/
-public abstract class EventService
+public abstract class EventService extends AbstractService
 {
    /** counter map stores the connection count to different servers **/
    private CounterMap connectionCount = new CounterMap();
    
    /** map for the event handlers **/
-   private EventHandlerMultiMap handlerMultiMap = new EventHandlerMultiMap();
+   private EventHandlerMultiMap handlerMultiMap;
    
    /** queue for incoming events **/
    private EventQueue eventQueue = new EventQueue();
@@ -29,12 +31,26 @@ public abstract class EventService
    /** event dispatcher for passing incoming events **/
    private EventDispatcher eventDispatcher;
    
+   /** Logging service **/
+   private LoggingService logService;
+   
    /**
     * Construct the basic event service.
     **/
    protected EventService()
    {
-      eventDispatcher = new EventDispatcher(eventQueue, handlerMultiMap);
+      
+   }
+   
+   /**
+    * Override initialization of this service to start the event service.
+    *
+    * @param params no params need to be passed
+    **/
+   public void initialize(ServiceParamMap params) throws ServiceException
+   {
+      startup();
+      System.out.println("ES: Event Service Started");
    }
    
    /**
@@ -43,6 +59,8 @@ public abstract class EventService
     **/
    public void startup()
    {
+      handlerMultiMap = new EventHandlerMultiMap();
+      eventDispatcher = new EventDispatcher(eventQueue, handlerMultiMap);
       // start the event dispatcher thread
       eventDispatcher.startup();
       serviceStarted = true;
@@ -287,6 +305,8 @@ public abstract class EventService
       event.setTopic(topic);
       event.setEventServerHost(host);
       event.setEventServerPort(port);
+      
+      System.out.println("[ES] Sending Event: " + event);
       
       // send the event
       sendEvent(host, port, topic, event);

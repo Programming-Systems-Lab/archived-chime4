@@ -91,7 +91,6 @@ class EventHandlerMultiMap
                                                     String topic)
    {
       Object key = makeKey(host, port, topic);
-      
       return (EventHandler) handlerMap.get(key);
    }
    
@@ -152,7 +151,7 @@ class EventHandlerMultiMap
     * @throws IllegalArgumentException
     *         if any parameter is <code>null</code>
     **/
-   public boolean isActive(String host, int port, String topic)
+   public synchronized boolean isActive(String host, int port, String topic)
    {
       // check for null
       if ((host == null) || (topic == null))
@@ -189,6 +188,11 @@ class EventHandlerMultiMap
       buf.append(port);
       
       return buf.toString();
+   }
+   
+   public String toString()
+   {
+      return getClass() + "[handlerMap=" + handlerMap + "]";
    }
 }
    
