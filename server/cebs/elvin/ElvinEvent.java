@@ -10,7 +10,7 @@ import org.elvin.je4.Notification;
  * @author Azubuko Obele
  * @version 0.1
  **/
-public class ElvinEvent extends Event
+class ElvinEvent extends Event
 {
     /** the notification object being wrapped **/
     private Notification notif;
@@ -23,7 +23,7 @@ public class ElvinEvent extends Event
      * @throws IllegalArgumentException
      *         if <code>notif</code> is <code>null</code>
      **/
-    public ElvinEvent(Notification notif)
+    ElvinEvent(Notification notif)
     {
         // check for null
         if (notif == null)
@@ -38,7 +38,7 @@ public class ElvinEvent extends Event
     /**
      * Construct a new empty Event object.
      **/
-    public ElvinEvent()
+    ElvinEvent()
     {
         notif = new Notification();
     }
@@ -120,7 +120,7 @@ public class ElvinEvent extends Event
      *
      * @return underlying Notification object.
      **/
-    public Notification getUnderlyingNotification()
+    Notification getUnderlyingNotification()
     {
         return notif;
     }

@@ -1,5 +1,6 @@
 package psl.chime4.server.cebs.elvin;
 
+import psl.chime4.server.cebs.Event;
 import psl.chime4.server.cebs.EventSystem;
 
 /**
@@ -50,5 +51,15 @@ public class ElvinEventSystem extends EventSystem
         buf.insert(0, "elvin:4.0/tcp,none,xdr/");
         
         return buf.toString();
+    }
+    
+    /**
+     * Create an empty Elvin event.
+     *
+     * @return an empty Elvin event.
+     **/
+    public Event createEmptyEvent()
+    {
+        return new ElvinEvent();
     }
 }

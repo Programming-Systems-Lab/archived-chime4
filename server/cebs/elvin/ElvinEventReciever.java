@@ -103,6 +103,8 @@ class ElvinEventReciever extends EventReciever implements NotificationListener
      * Open a physical Elvin-Consumer connection to a server.
      *
      * @param server the server to connect to
+     * @throws CEBSException
+     *         if the connection could not be made
      **/
     protected void openRealConnection(String server) throws CEBSException
     {
@@ -130,17 +132,13 @@ class ElvinEventReciever extends EventReciever implements NotificationListener
      * @param server the server to disconnect from
      **/
     protected void closeRealConnection(String server)
-    {
-        // if we are connected to the server
-        if ( isConnectedToServer(server) )
-        {
-            // get the consumer and close it
-            Consumer consumer = (Consumer) connectionMap.get(server);
-            consumer.close();
-            
-            // remove it from the map
-            connectionMap.remove(server);
-        }
+    {  
+        // get the consumer and close it
+        Consumer consumer = (Consumer) connectionMap.get(server);
+        consumer.close();
+        
+        // remove it from the map
+        connectionMap.remove(server);
     }
     
     /**

@@ -84,4 +84,11 @@ public abstract class EventSystem
     {
         return eventReciever;
     }
+    
+    /**
+     * Create an empty Event.
+     *
+     * @return an empty Event
+     **/
+    public abstract Event createEmptyEvent();
 }

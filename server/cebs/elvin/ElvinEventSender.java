@@ -37,6 +37,8 @@ class ElvinEventSender extends EventSender
      * an actual Producer object and caches it.
      *
      * @param server Elvin server to connect to
+     * @throws CEBSException
+     *         if the connection could not be made
      **/
     protected void openRealConnection(String server) throws CEBSException
     {
