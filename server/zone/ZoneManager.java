@@ -58,6 +58,8 @@ public class ZoneManager {
      * does nothing more than perform the actual upgrade.
      **/
     public void addZoneService(NetworkNode chimeServer) {
+	PeerCommunicator.sendMessage(PeerCommunicator.START_ZONE_SERVICE,
+				     chimeServer);
     }
 
 
@@ -68,6 +70,8 @@ public class ZoneManager {
      * Demotes the specified zone server back to a regular CHIME server.
      **/
     public void removeZoneService(NetworkNode zoneServer) {
+	PeerCommunicator.sendMessage(PeerCommunicator.STOP_ZONE_SERVICE,
+				     zoneServer);
     }
 
 
@@ -227,6 +231,10 @@ public class ZoneManager {
      *          this server, nothing is done.
      **/
     public void splitZone(Zone zone) {
+
+	if (zoneSettings.hasPrimaryZone(zone)) {
+	    dataManager.describeZoneOrganization();
+	}
 	// 1) Check if zone is in primary coverage
 	// 2) Split & rename and update coverage list in zoneSettings
 	// 3) Have the data manager figure out who is in what new zone

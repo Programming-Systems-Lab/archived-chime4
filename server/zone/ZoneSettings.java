@@ -164,6 +164,13 @@ public class ZoneSettings {
 
 
 
+    public boolean hasPrimaryZone(Zone z) {
+	return primaryList.contains(z);
+    }
+
+
+
+
     /**
      * Allocates backup responsibility for the following set of zones
      * to this zone server.  Two levels of backup responsibility are

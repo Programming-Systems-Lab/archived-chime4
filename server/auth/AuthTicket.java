@@ -1,5 +1,5 @@
 
-package psl.chime4.auth;
+package psl.chime4.server.auth;
 
 
 import java.util.Date;
