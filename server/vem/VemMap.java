@@ -5,9 +5,9 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.vem;
+package psl.chime4.server.vem;
 
-import psl.chime4.data.User;
+import psl.chime4.server.data.User;
 
 /**
  * <p>This object stores a mapping between a user and file pattern
@@ -74,9 +74,9 @@ public class VemMap {
 			return 0;
 		
 		if (mPattern.indexOf('*') < 0) {  // if not a pattern
-		    r = mUser.getID()==User.GLOBAL_ID ? GLOBAL_EXPLICIT : USER_EXPLICIT;
+		    r = mUser.getPersistenceID()==User.GLOBAL_ID ? GLOBAL_EXPLICIT : USER_EXPLICIT;
 		} else	{
-		    r = mUser.getID()==User.GLOBAL_ID ? GLOBAL_PATTERN : USER_PATTERN;
+		    r = mUser.getPersistenceID()==User.GLOBAL_ID ? GLOBAL_PATTERN : USER_PATTERN;
 		}
 
 		return r;

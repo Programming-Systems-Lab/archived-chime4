@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
- package psl.chime4.vem;
+package psl.chime4.server.vem;
 
 /**
  * This class represents visualization information for any given

@@ -1,4 +1,4 @@
-package psl.chime4.vem;
+package psl.chime4.server.vem;
 
 /**
  * A typesafe enum for VEM types.  Objects of this type are guaranteed to
