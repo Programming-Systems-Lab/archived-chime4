@@ -16,7 +16,7 @@ import psl.chime4.server.data.Persistent;
  * @version 1.0
  **/
 
-public class UserData implements Persistent {
+public class User implements Persistent {
 
     /**
      * Valid services.  Any given network node may be authorized to provide
@@ -42,7 +42,7 @@ public class UserData implements Persistent {
     /**
      * Creates a new blank user data entry
      **/
-    public UserData() {
+    public User() {
 	persistenceID = -1;
 	publicKey = null;
 	userID = null;
@@ -193,4 +193,4 @@ public class UserData implements Persistent {
 
 
     
-} // end UserData class
+} // end User class
