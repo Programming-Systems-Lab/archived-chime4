@@ -2,49 +2,56 @@ package psl.chime4.server.di;
 
 public class DIHost
 {
-    public DIHost( int setIdent, DIType setType, String setInfo, int length,
-		   int setMode )
-    {
+	private DIZone zone;
+	private DIType hostID;
+	private DIType hostType;
+	private String info;
 
+    public DIHost( DIType setIdent, DIType setType, String setInfo, int length, DIZone setZone )
+    {
+		hostID = setIdent;
+		hostType = setType;
+		info = setInfo;
+		zone = setZone;
     }
 
     public void setHostType( DIType setType )
     {
-
+		hostType = setType;
     }
 
-    public void setHostInfo( String setInfo, int length )
+    public void setHostInfo( String setInfo )
     {
-
+		info = setInfo;
     }
 
-    public void setHostID( int setIdent )
+    public void setHostID( DIType setIdent )
     {
-
+		hostID = setIdent;
     }
 
-    public void setHostMode( int setMode )
+    public void setHostZone( DIZone setZone )
     {
-
-    }
+		zone = setZone;
+	}
 
     public DIType getHostType()
     {
-	return null;
+		return hostType;
     }
 
     public String getHostInfo()
     {
-	return null;
+		return info;
     }
 
-    public int getHostMode()
+    public DIZone getHostZone()
     {
-	return 0;
+		return zone;
     }
 
-    public int getHostID()
+    public DIType getHostID()
     {
-	return 0;
+		return hostID;
     }
 }
