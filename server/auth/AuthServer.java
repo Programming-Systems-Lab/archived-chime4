@@ -6,7 +6,8 @@ import java.io.*;
 import java.util.Vector;
 import java.util.Hashtable;
 
-
+import psl.chime4.server.di.*;
+import psl.chime4.server.util.StringParser;
 
 
 
@@ -27,7 +28,7 @@ import java.util.Hashtable;
  * @version 1.0
  **/
 
-public class AuthServer {
+public class AuthServer implements DIEventReceiver, MessageDefinitions {
 
 
     /**
@@ -40,6 +41,8 @@ public class AuthServer {
 
     private Thread serverThread;
     private boolean runThread;
+
+    private DirectoryInterface di;  // network communication interface
 
     private byte[] privateKey = null;
     private byte[] publicKey = null;
@@ -85,6 +88,8 @@ public class AuthServer {
 	userList = new Hashtable();
 	serverThread = null;
 	runThread = true;
+
+	di = null; // INTEGRATE: NEED TO SET DIRECTORY INTERFACE HERE
     }
 
 
@@ -98,7 +103,7 @@ public class AuthServer {
     public void startAuthServer() {
 	serverThread = new Thread() {
 		public void run() {
-		    processNetworkEvents();
+		    runMainThread();
 		}
 	    };
 	serverThread.start();
@@ -168,9 +173,11 @@ public class AuthServer {
      * If no such username is known to the auth server, returns null
      **/
     private User getUserData(String username) {
-	User ans = new User();
-	// retrieve user info from data server here...
-	return ans;
+
+	// retrieve user info from data server here...	
+	// User ans = dataServer.load(username);
+	// return ans;
+	return null;
     }
 
 
@@ -182,17 +189,77 @@ public class AuthServer {
      * for network events and issues appropriate responses / takes appropriate
      * action as a result
      **/
-    private void processNetworkEvents() {
+    private void runMainThread() {
 	while (runThread) {
-	    // 1) Receive request for auth ticket
-	    //     a) authenticate, return ticket
-	    //
-	    // 2) 
+	    new Thread().sleep(1000);
+	    // nothing needs to be done here as of now...  Right now all
+	    // the server does is wait for authentication requests and
+	    // grant them, which is handled in the receiveMessage method
+	    // event-callback style
 	}
     }
 
 
 
+
+
+    public void receiveMessage(DIMessage msg) {
+
+	if (msg.getType().equals(AUTHENTICATION_REQUEST))
+	    processAuthenticationRequest(msg);	
+    }
+
+
+
+
+
+    public void receiveEvent(DIEvent event) {
+    }
+
+
+
+
+
+    public void receiveResult(DIHost result) {
+    }
+
+
+
+
+
+    private void processAuthenticationRequest(DIMessage msg) {
+	String msgData = msg.getBody().getData();
+	    
+	try {
+	    // Parse message body: find userid and supplied authcode (password)
+	    Hashtable h = StringParser.parseKeyValueString(msgData);
+	    String userid = (String) h.get(USERID);
+	    byte[] authCode = ((String) h.get(AUTHCODE)).getBytes();
+	    
+	    // Obtain our auth ticket and write it to a byte array
+	    AuthTicket ticket = authenticateUser(userid, authCode);
+	    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	    ObjectOutputStream out = new ObjectOutputStream(stream);
+	    out.writeObject(ticket);
+	    out.flush();
+	    
+	    // Return authentication ticket to the user (grant authentication)
+	    Hashtable result = new Hashtable();
+	    result.put(AUTHTICKET, stream.toString());
+	    String stringResult = StringParser.generateKeyValueString(result);
+	    di.communicate(msg.getSender(), new DIType(AUTHENTICATION_GRANT),
+			   new DIMessageBody(stringResult));
+	    
+	    
+	}
+	catch (AuthFailedException e) {  /* if authentication has failed */
+	    di.communicate(msg.getSender(), new DIType(AUTHENTICATION_REJECT),
+			   new DIMessageBody("Authentication failed."));
+	}
+    }
+
+
+    
 
 
     /**

@@ -2,7 +2,10 @@
 package psl.chime4.server.auth;
 
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.StringTokenizer;
+
 import psl.chime4.server.data.Persistent;
 
 
@@ -88,6 +91,29 @@ public class AuthTicket implements Persistent {
 	
 	else {
 	    // given plaintext, set all data appropriately
+	    // We assume that plaintext is of the form "key1=val1 key2=val2..."
+	    // where valid keys are 'userID', 'authID', 'startDate', 
+	    // 'expireDate', 'validServices'
+	    StringTokenizer st = new StringTokenizer(plaintext);
+	    DateFormat dt = DateFormat.getDateInstance();
+	    while (st.hasMoreTokens()) {
+		try {
+		    StringTokenizer pair = new StringTokenizer(st.nextToken(),
+							       "=");
+		    String key = pair.nextToken().toLowerCase();
+		    String value = pair.nextToken();
+		  
+		    if (key.equals("userid")) userID = value;
+		    else if (key.equals("authid")) authorityID = value;
+		    else if (key.equals("startdate")) 
+			startDate = dt.parse(value);
+		    else if (key.equals("expiredate"))
+			expireDate = dt.parse(value);
+		    else if (key.equals("validservices"))
+			validServices = Integer.valueOf(value).intValue();
+		}
+		catch (Exception e) {/* string parsing error */}
+	    }
 	}	
     }
 	
@@ -202,3 +228,4 @@ public class AuthTicket implements Persistent {
 
     
 } // end AuthTicket class
+
