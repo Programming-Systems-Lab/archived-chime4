@@ -87,6 +87,8 @@ public class EventSession implements EventHandler
       eventService.unregisterEventHandler(host, port, topic, this);
       // close the connection
       eventService.closeConnection(host, port);
+      // close the queue
+      eventQueue.close();
       
       sessionOpen = false;
    }
