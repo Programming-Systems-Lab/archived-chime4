@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data.server.librarian;
+package psl.chime4.server.librarian;
 
 /**
  * Encapsulates a librarian search request, which currently consists of only a
