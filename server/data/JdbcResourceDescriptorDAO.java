@@ -17,7 +17,8 @@ import psl.chime4.server.data.sql.*;
  *
  * @author Mark Ayzenshtat 
  */
-public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {	
+public class JdbcResourceDescriptorDAO extends AbstractJdbcDAO
+		implements ResourceDescriptorDAO {	
 	// table names
 	private static final String kTableRDs = "ResourceDescriptors";
 	private static final String kTableMoreData = "RDAdditionalData";
@@ -39,22 +40,11 @@ public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {
 	
 	private static final String[] kZeroStringArray = new String[0];
 	
-	private ConnectionSource mConnectionSource;
-	
 	/*
 	 * Package-scope constructor to ensure instantiation through factory.
 	 */
 	JdbcResourceDescriptorDAO() {
-		// get a connection source from the factory
-		mConnectionSource = ConnectionSourceFactory.getInstance()
-			.getConnectionSource();
-		
-		// make sure DB tables exist
-		try {
-			ensureTablesExist();
-		} catch (DataAccessException ex) {
-			throw new RuntimeException("Could not acquire tables.", ex);
-		}
+		super();
 	}
 	
 	/**
@@ -175,7 +165,11 @@ public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {
 		// TODO: Implement me
 	}
 
-	private void ensureTablesExist() throws DataAccessException {
+	/**
+	 * Ensures that data tables exist.  If they do not exist, it is expected
+	 * that they will after this method completes.
+	 */
+	protected void ensureTablesExist() throws DataAccessException {
 		Connection conn = null;
 		Statement stmt = null;
 		
@@ -203,41 +197,6 @@ public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {
 				DataAccessException("Error while attempting to create tables.", ex);
 		} finally {
 			cleanUp(conn, stmt, null);
-		}		
-	}
-	
-	/*
-	 * Retrieves a connection from the connection source.
-	 */
-	private Connection getConnection() throws DataAccessException {		
-		try {
-			return mConnectionSource.obtainConnection();
-		} catch (SQLException ex) {
-			throw new DataAccessException("Could not obtain connection.", ex);
-		}
-	}
-
-	/*
-	 * Safely disposes of a <code>Connection</code>, <code>Statement</code>,
-	 * and <code>ResultSet</code>.
-	 */
-	private void cleanUp(Connection iConn, Statement iStmt, ResultSet iRS) 
-			throws DataAccessException {		
-		try {
-			if (iRS != null) {
-				iRS.close();
-			}
-			
-			if (iStmt != null) {
-				iStmt.close();
-			}
-			
-			if (iConn != null) {
-				mConnectionSource.releaseConnection(iConn);
-			}
-		} catch (SQLException ex) {
-			throw new 
-				DataAccessException("Could not dispose of connection.", ex);
 		}		
 	}
 

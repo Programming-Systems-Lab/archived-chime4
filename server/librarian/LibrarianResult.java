@@ -7,6 +7,8 @@
 
 package psl.chime4.server.librarian;
 
+import psl.chime4.server.data.ResourceDescriptor;
+
 /**
  * Encapsulates a librarian search result.
  *

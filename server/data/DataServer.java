@@ -20,7 +20,7 @@ import psl.chime4.server.librarian.LibrarianRequest;
  * @author Mark Ayzenshtat
  */
 public class DataServer {
-	public static final DIType kDirectoryType = new DIType("DataServer");
+	public static final DIType kDirectoryType = new DIType("LibrarianSearch");
 	
 	private boolean mInitialized;
 	private DAOFactory mDAOFactory;
@@ -28,7 +28,7 @@ public class DataServer {
 	private DIEventReceiver mDirEventReceiver;
 	
 	public DataServer() {
-		initialized = false;
+		mInitialized = false;
 		mDAOFactory = new JdbcDAOFactory();
 		// mDirInterface = (acquire this ref somehow
 		// ...probably passed to constructor...
@@ -87,6 +87,10 @@ public class DataServer {
 	 * @param iReq an object that encapsulates the search constraints
 	 */
 	public void doLibrarianSearch(LibrarianRequest iReq) {
+		// check own data store
 		
+		// send library request URLs to FRAX		
+		
+		// send librarian request across network		
 	}
 }
