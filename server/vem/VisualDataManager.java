@@ -4,9 +4,7 @@
  * Created on March 29, 2002, 1:17 PM
  */
 
-package psl.chime4.vem;
-
-import psl.chime4.data.*;
+package psl.chime4.server.vem;
 
 /**
  * Public API interface to the server side VEM (Visual Environment Modeler)
@@ -15,11 +13,22 @@ import psl.chime4.data.*;
  */
 public class VisualDataManager {
     
-    private static VisualDataManager mVDM;
+    /** Singleton object  */
+    private static VemMapDAO dataStore;
+    private VemMapDAO mDataStore;
+    
+    public long mUser;
+    public String mTheme;
     
     /** Creates a new instance of VisualDataManager */
-    private VisualDataManager() {
-		VemMapDAO dao = VemMapDAOFactory.getInstance().getDAO();
+    public VisualDataManager() {
+        if (dataStore == null) {
+            dataStore = VemMapDAOFactory.getInstance();
+        }
+        
+        mDataStore = dataStore;
+        
+        
     }
     
     public long getModel(long objectID, long typeID) {
@@ -37,20 +46,23 @@ public class VisualDataManager {
     */
     
     public void setUser(long userID) {
+        this.mUser = userID;
     }
     
     public void setTheme(String themeName) {
+        this.mTheme = themeName;
     }
     
     public void doChangeRequest(ChangeViewRequest cvr) {
     }
     
+    /*
     public static VisualDataManager getInstance() {
         if (mVDM == null) {
             mVDM = new VisualDataManager();
         }
         
         return mVDM;
-    }
-    
+    }   
+    */   
 }
