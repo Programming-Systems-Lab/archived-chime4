@@ -8,6 +8,7 @@
 package psl.chime4.server.data;
 
 import psl.chime4.server.librarian.LibrarianRequest;
+// import directory interface classes
 
 /**
  * The <code>DataServer</code> class represents the central access point for
@@ -19,24 +20,48 @@ import psl.chime4.server.librarian.LibrarianRequest;
  * @author Mark Ayzenshtat
  */
 public class DataServer {
-	private DAOFactory mDAOFactory;
+	public static final DIType kDirectoryType = new DIType("DataServer");
 	
-	public DataServer() {	
+	private boolean mInitialized;
+	private DAOFactory mDAOFactory;
+	private DirectoryInterface mDirInterface;
+	private DIEventReceiver mDirEventReceiver;
+	
+	public DataServer() {
+		initialized = false;
 		mDAOFactory = new JdbcDAOFactory();
+		// mDirInterface = (acquire this ref somehow
+		// ...probably passed to constructor...
+		// ...assume that DirectoryInterface is already connected when we get it)
+		mDirEventReceiver = new DataServerEventReceiver(this);
 	}
 	
 	/**
 	 * Initializes this data server.
 	 */
 	public void startup() {
-		// TODO: Implement me.
+		if (mInitialized) {
+			return;
+		}
+		
+		// subscribe to directory service
+		mDirInterface.subscribe(mDirEventReceiver, kDirectoryType);
+		
+		mInitialized = true;
 	}
 	
 	/**
 	 * Shuts down this data server.
 	 */
 	public void shutdown() {
-		// TODO: Implement me.
+		if (!mInitialized) {
+			return;
+		}
+		
+		// unsubscribe from directory service
+		mDirInterface.unsubscribe(mDirEventReceiver, kDirectoryType);
+		
+		mInitialized = false;
 	}
 	
 	/**
