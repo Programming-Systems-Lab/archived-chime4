@@ -38,6 +38,11 @@ public class DISubscription
 		}
 	}
 
+	public LinkedList getSubscribers()
+	{
+		return subscribers;
+	}
+
 	public int getNumSubscribers()
 	{
 		return subscribers.size();

@@ -1,6 +1,6 @@
 package psl.chime4.server.di;
 
-import psl.chime4.server.cebs.*;
+import psl.chime4.server.ces.*;
 
 public class DIMessage
 {
@@ -57,17 +57,17 @@ public class DIMessage
 		msgReceiver = receiver;
 	}
 
-	public Event getCebsEvent()
+	public Event getCesEvent()
 	{
-		Event cebsEvent;
+		Event cesEvent;
 
-		cebsEvent = DirectoryInterface.eventSystem.createEmptyEvent();
+		cesEvent = DirectoryInterface.eventService.createEmptyEvent();
 
-		cebsEvent.put("sender", msgSender.toString() );
-		cebsEvent.put("receiver", msgReceiver.toString() );
-		cebsEvent.put("type", msgType.toString() );
-		cebsEvent.put("body", msgBody.getData() );
+		cesEvent.put("sender", msgSender.toString() );
+		cesEvent.put("receiver", msgReceiver.toString() );
+		cesEvent.put("type", msgType.toString() );
+		cesEvent.put("body", msgBody.toBytes() );
 
-		return cebsEvent;
+		return cesEvent;
 	}
 }

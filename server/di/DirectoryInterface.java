@@ -1,24 +1,26 @@
 package psl.chime4.server.di;
 
 
-import psl.chime4.server.cebs.*;
+import psl.chime4.server.ces.*;
 
 import java.util.*;
 
-public class DirectoryInterface
+public class DirectoryInterface implements EventHandler
 {
 	public static final int STATUS_LEAF = 0;
 	public static final int STATUS_SERVER = 1;
 	public static final int STATUS_ZONE = 2;
 
-	private static final String DI_CEBS_TOPIC = "DI";
+	private static final String DI_CES_TOPIC = "DI";
 	public static final DIType DI_CONTROL_MESSAGE = new DIType("DI_Control");
 
+	public static final String DI_DISCONNECT_COMMAND = "DISCONNECT";
 	public static final String DI_UPDATE_COMMAND = "UPDATE";
 	public static final String DI_REQUEST_ZONES_COMMAND = "REQUEST_ZONES";
 	public static final String DI_REQUEST_SUB_COMMAND = "REQUEST_SUB";
 	public static final String DI_REQUEST_UNSUB_COMMAND = "REQUEST_UNSUB";
 	public static final String DI_SEARCH_COMMAND = "SEARCH";
+	public static final String DI_RESULT_COMMAND = "RESULT";
 	public static final String DI_REQUEST_PROMOTE_COMMAND = "REQUEST_PROMOTE";
 	public static final String DI_REQUEST_DEMOTE_COMMAND = "REQUEST_DEMOTE";
 
@@ -36,24 +38,24 @@ public class DirectoryInterface
 	private static DIType ident;
 	private static int status;
 
-	public static CebsEventSystem eventSystem;
+	public static EventService eventService;
 
 	/**
 	 * Initializes the Directory Interface as a leaf node, a node that will just
 	 * receive messages and search results from an infrastructure node (zone server)
 	 * and will not actually be an entry within the system itself.
 	 *
-	 * @param system the currently running CEBS event system to use for communications
+	 * @param system the currently running event service to use for communications
 	 * @param setMaster the main event receiver for the directory interface, for error conditions, etc
 	 * @param setIdent the identification information for this host, used to identify it amongst all systems
 	 */
-    public static void initialize( CebsEventSystem system, DIEventReceiver setMaster, DIType setIdent )
+    public static void initialize( EventService service, DIEventReceiver setMaster, DIType setIdent )
     {
 		status = STATUS_LEAF;
 		master = setMaster;
 		primaryZone = null;
 		ident = setIdent;
-		eventSystem = system;
+		eventService = service;
 
 		zones = new LinkedList();
 		nodeTypeHash = new Hashtable();
@@ -70,15 +72,15 @@ public class DirectoryInterface
 	 * Otherwise, it will just be a leaf node (although leaf nodes can become servers by
 	 * calling the update() method.
 	 *
-	 * @param system the currently running CEBS event system to use for communications
+	 * @param system the currently running event service to use for communications
 	 * @param setMaster the main event receiver for the directory interface, for error conditions, etc
 	 * @param setIdent the identification information for this host, used to identify it amongst all systems
 	 * @param setType the directory type for this host, which can then be used for searching
 	 * @param setInfo the information to be listed for this server in the directory
 	 */
-	public static void initialize( CebsEventSystem system, DIEventReceiver setMaster, DIType setIdent, DIType setType, String setInfo )
+	public static void initialize( EventService service, DIEventReceiver setMaster, DIType setIdent, DIType setType, String setInfo )
 	{
-		initialize( system, setMaster, setIdent );
+		initialize( service, setMaster, setIdent );
 
 		status = STATUS_SERVER;
 		type = setType;
@@ -92,7 +94,7 @@ public class DirectoryInterface
     public static void shutdown()
     {
 		master = null;
-		eventSystem = null;
+		eventService = null;
 
 		zones = null;
 		nodeTypeHash = null;
@@ -126,13 +128,13 @@ public class DirectoryInterface
 
 			try
 			{
-				eventSystem.unregisterEventHandler( primaryZone.getAddress(),
-												primaryZone.getPort(), DI_CEBS_TOPIC );
+				eventService.unregisterEventHandler( primaryZone.getAddress(), primaryZone.getPort(),
+														DI_CES_TOPIC, primaryZone.getHandler() );
 			}
 
 			catch( Exception e )
 			{
-
+				e.printStackTrace();
 			}
 
 			primaryZone = null;
@@ -160,18 +162,21 @@ public class DirectoryInterface
 
 		//make a new zone
 		zone = new DIZone( address, port, mode );
-		zone.setHandler( new DICebsHandler( zone ) );
+		zone.setHandler( new DirectoryInterface( zone ) );
 
 		//connect to it
 		try
 		{
-			eventSystem.openConnection( address, port );
-			eventSystem.registerEventHandler( address, port, DI_CEBS_TOPIC, zone.getHandler() );
+			eventService.openConnection( address, port );
+			eventService.registerEventHandler( address, port, DI_CES_TOPIC, zone.getHandler() );
 		}
 
 
 		catch( Exception e )
 		{
+
+			e.printStackTrace();
+
 			return;
 		}
 
@@ -294,8 +299,8 @@ public class DirectoryInterface
 			sub = new DISubscription( subType );
 
 			//if we're a leaf, inform our parent to send us these types of messages
-			if( status != STATUS_ZONE )
-				requestSubscribe( primaryZone, subType );
+			//if( status != STATUS_ZONE )
+			//	requestSubscribe( primaryZone, subType );
 
 			//put the new subscription into the hash
 			objectSubHash.put( subType.toString(), sub );
@@ -334,8 +339,8 @@ public class DirectoryInterface
 			objectSubHash.remove( subType.toString() );
 
 			//inform the server if we're a leaf
-			if( status != STATUS_ZONE )
-				requestUnsubscribe( primaryZone, subType );
+			//if( status != STATUS_ZONE )
+			//	requestUnsubscribe( primaryZone, subType );
 		}
     }
 
@@ -370,15 +375,11 @@ public class DirectoryInterface
 	 */
     public static void communicate( DIType comHost, DIType msgType, DIMessageBody msgBody )
     {
-		//if we're a zone, check hosts
-		if( status == STATUS_ZONE )
-		{
-
-		}
-
-		//if we have no host or we're not a zone,
-		//just send it to the primary
-
+		//in all cases, send it to the primary zone
+		//for a zone server this'll bounce it off its local server, so that other
+		//servers can then pick it up. for a server/leaf, this will send to the primary
+		//zone server which will then bounce the message on to the other servers, so this
+		//works just fine.
     }
 
 	/**
@@ -387,7 +388,8 @@ public class DirectoryInterface
 	 * zone servers of this change. Once they have been informed, all of those other zone servers will
 	 * subscribe to this host's event distributing server, so that messages can be distributed. Similarly,
 	 * this host will subscribe to every zone server's event distributing server. The zone list will then
-	 * be updated to reflect the changes to the network's infrastructure.
+	 * be updated to reflect the changes to the network's infrastructure. The primary zone of the zone
+	 * server will then be set to the local host address.
 	 */
     public static void promote()
     {
@@ -423,6 +425,72 @@ public class DirectoryInterface
     public static DIType getIdent()
     {
 		return ident;
+	}
+
+	/**
+	 * This method will return the current status of this interface.
+	 *
+	 * @return current system status
+	 */
+	public static int getStatus()
+	{
+		return status;
+	}
+
+	public static void deliverMessage( DIMessage msg )
+	{
+		LinkedList list;
+		ListIterator itr;
+		DISubscription sub;
+		DISubscriber scriber;
+		DIEventReceiver receiver;
+		DIHost hostReceiver;
+
+		//get it out of the hash
+		sub = (DISubscription) objectSubHash.get( msg.getType().toString() );
+
+		//get the list if it exists
+		if( sub != null )
+		{
+			list = sub.getSubscribers();
+
+			itr = list.listIterator();
+
+			//send them all the message
+			while( itr.hasNext() )
+			{
+				scriber = (DISubscriber) itr.next();
+
+				receiver = (DIEventReceiver) scriber.getIdentValue();
+
+				receiver.receiveMessage( msg );
+			}
+		}
+	}
+
+	public static void relayMessage( Event relayEvent )
+	{
+		String serverAddress;
+		int serverPort;
+
+		/*
+		We need to resend this to the hosts that didn't get the message.
+		If the message came from another zone server, then we need to
+		rebroadcast it on our own server, after setting the relay flag.
+		*/
+
+		serverAddress = relayEvent.getEventServerHost();
+		serverPort = relayEvent.getEventServerPort();
+
+		//if it's not from the local server, hit the local host with it
+		if( primaryZone.getAddress().compareTo(serverAddress) == 0 &&
+			primaryZone.getPort() != serverPort )
+		{
+			relayEvent.put("relay", 1);
+
+			//send to local host
+			broadcastEvent( relayEvent );
+		}
 	}
 
 	private static void requestPromote()
@@ -564,9 +632,27 @@ public class DirectoryInterface
 			if( cur.getMode() == DIZone.MODE_INFRASTRUCTURE ||
 				cur.getMode() == DIZone.MODE_LEAF )
 			{
-				msg.setReceiver( cur.getIdent() );
-
 				sendMessage( cur, msg );
+			}
+		}
+	}
+
+	private static void broadcastEvent( Event event )
+	{
+		ListIterator list;
+		DIZone cur;
+		list = zones.listIterator();
+
+		//go through all zones
+		while( list.hasNext() )
+		{
+			cur = (DIZone) list.next();
+
+			//if it's actually connected, send it an update
+			if( cur.getMode() == DIZone.MODE_INFRASTRUCTURE ||
+				cur.getMode() == DIZone.MODE_LEAF )
+			{
+				sendEvent( cur, event );
 			}
 		}
 	}
@@ -575,12 +661,146 @@ public class DirectoryInterface
 	{
 		try
 		{
-			eventSystem.publish( receiver.getAddress(), receiver.getPort(), DI_CEBS_TOPIC, msg.getCebsEvent() );
+			eventService.publish( receiver.getAddress(), receiver.getPort(), DI_CES_TOPIC, msg.getCesEvent() );
 		}
 
 		catch( Exception e )
 		{
-
+			e.printStackTrace();
 		}
 	}
+
+	private static void sendEvent( DIZone receiver, Event event )
+	{
+		try
+		{
+			eventService.publish( receiver.getAddress(), receiver.getPort(), DI_CES_TOPIC, event );
+		}
+
+		catch( Exception e )
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/** non static elements **/
+	private DIZone zone;
+
+	public DirectoryInterface( DIZone theZone )
+	{
+		zone = theZone;
+	}
+
+	public void handleEvent( Event event )
+	{
+		DIMessage theMessage;
+		DIMessageBody theBody;
+		String msgSender;
+		String msgReceiver;
+		String msgType;
+		byte[] msgBody;
+		DICommand command;
+		int commandType;
+		String curArg;
+
+		//get the event info
+		msgSender = event.getString("sender");
+		msgReceiver = event.getString("receiver");
+		msgType = event.getString("type");
+		msgBody = event.getByteArray("body");
+
+		//see if it's a control message
+		if( msgType.compareTo(DirectoryInterface.DI_CONTROL_MESSAGE) == 0 )
+		{
+			//make sure it's from the local server
+			if( primaryZone.getAddress().compareTo(event.getEventServerHost()) == 0
+				|| primaryZone.getPort() != event.getEventServerPort() )
+				return;
+
+			//parse the command
+			command = DICommand.parseCommand( msgBody );
+
+			//get the command type from the first arg
+			curArg = command.getArgString();
+
+			//now act appropriately
+			if( curArg.compareTo( DI_DISCONNECT_COMMAND ) == 0 )
+			{
+				//find the host record
+
+				//check the connection state
+
+				//kill it
+			}
+			else if( curArg.compareTo( DI_UPDATE_COMMAND ) == 0 )
+			{
+				//find host record
+
+				//if not found, create
+
+				//if found, update it
+			}
+			else if( curArg.compareTo( DI_REQUEST_ZONES_COMMAND ) == 0 )
+			{
+
+			}
+			else if( curArg.compareTo( DI_SEARCH_COMMAND ) == 0 )
+			{
+				//find all hosts
+
+				//send out result commands for each host found
+			}
+			else if( curArg.compareTo( DI_RESULT_COMMAND ) == 0 )
+			{
+				//find the search
+
+				//deliver the result
+			}
+			else if( curArg.compareTo( DI_REQUEST_PROMOTE_COMMAND ) == 0 )
+			{
+				//tell primary that you're promoting
+
+				//connect to all other zone servers
+
+				//reset the primary zone server to localhost
+
+				//update status
+			}
+			else if( curArg.compareTo( DI_REQUEST_DEMOTE_COMMAND ) == 0 )
+			{
+				//tell primary we're demoting
+
+				//disconnect from all other zones
+
+				//send an update to the first zone
+
+
+			}
+
+			//skip message delivery
+			return;
+		}
+
+		//create the message
+		theBody = new DIMessageBody( msgBody );
+
+		theMessage = new DIMessage( new DIType(msgType), theBody,
+									new DIType(msgSender), new DIType(msgReceiver) );
+
+		//deliver it to all local objects
+		deliverMessage( theMessage );
+
+		//relay to other hosts if we're a zone and there's no relay flag
+		if( getStatus() == STATUS_ZONE )
+		{
+			if( !event.containsKey("relay") )
+				relayMessage( event );
+		}
+	}
+
+	public void setZone( DIZone theZone )
+	{
+		zone = theZone;
+	}
+
 }

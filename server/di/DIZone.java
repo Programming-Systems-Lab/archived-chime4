@@ -1,12 +1,14 @@
 package psl.chime4.server.di;
 
+import psl.chime4.server.ces.*;
+
 public class DIZone
 {
 	public static final int MODE_KNOWN = 0;
 	public static final int MODE_INFRASTRUCTURE = 1;
 	public static final int MODE_LEAF = 2;
 
-	private DICebsHandler handler;
+	private DirectoryInterface handler;
 	private String address;
 	private int port;
 	private int mode;
@@ -19,13 +21,13 @@ public class DIZone
 		mode = setMode;
     }
 
-    public void setHandler( DICebsHandler eventHandler )
+    public void setHandler( DirectoryInterface eventHandler )
     {
 		handler.setZone( this );
 		handler = eventHandler;
 	}
 
-	public DICebsHandler getHandler()
+	public DirectoryInterface getHandler()
 	{
 		return handler;
 	}

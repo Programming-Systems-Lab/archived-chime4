@@ -2,15 +2,25 @@ package psl.chime4.server.di;
 
 public class DIMessageBody
 {
-	String data;
+	byte data[];
 
     public DIMessageBody( String msgData )
     {
-		data = msgData;
+		data = msgData.getBytes();
     }
 
-    String getData()
+    public DIMessageBody( byte[] msgData )
+    {
+		data = msgData;
+	}
+
+    public String toString()
+    {
+		return new String( data );
+    }
+
+    public byte[] toBytes()
     {
 		return data;
-    }
+	}
 }
