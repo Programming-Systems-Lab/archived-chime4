@@ -100,8 +100,7 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 			
 			return u;
 		} catch (SQLException ex) {			
-			throw new
-				DataAccessException("Error loading User.", ex);
+			throw new DataAccessException("Error loading User.", ex);
 		} finally {
 			cleanUp(conn, stmt, rs);
 		}
@@ -130,8 +129,7 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 			// store user
 			stmt.executeUpdate(buildStoreUserStatement(u));
 		} catch (SQLException ex) {			
-			throw new
-				DataAccessException("Error storing resource descriptor.", ex);
+			throw new DataAccessException("Error storing user.", ex);
 		} finally {
 			cleanUp(conn, stmt, null);
 		}
@@ -145,7 +143,29 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 	 * due to a failure in the backing store
 	 */
 	public int create() throws DataAccessException {
-		return 0;
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		// get a connection
+		conn = getConnection();
+		
+		try {
+			stmt = conn.createStatement();
+			
+			// create the row
+			stmt.executeUpdate(buildCreateUserStatement());
+			
+			// get the ID of the row we just created
+			rs = stmt.executeQuery(buildGetMaxIDQuery());
+			rs.next();
+			
+			return rs.getInt(1);
+		} catch (SQLException ex) {
+			throw new DataAccessException("Error creating user.", ex);
+		} finally {
+			cleanUp(conn, stmt, rs);
+		}
 	}
 
 	/**
@@ -156,6 +176,22 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 	 * due to a failure in the backing store
 	 */
 	public void delete(int iID) throws DataAccessException {
+		Connection conn = null;
+		Statement stmt = null;
+		
+		// get a connection
+		conn = getConnection();
+		
+		try {
+			stmt = conn.createStatement();
+			
+			// delete user
+			stmt.executeUpdate(buildDeleteUserStatement(iID));
+		} catch (SQLException ex) {
+			throw new DataAccessException("Error deleting user.", ex);
+		} finally {
+			cleanUp(conn, stmt, null);
+		}
 	}
 
 	// query/statement builders -- methods that neatly assemble the SQL
@@ -170,7 +206,7 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 		// ...and their corresponding types
 		String[] types = {
 			"integer PRIMARY KEY", "varchar(200)", "varchar(200)",
-			"varbinary(4096)", "integer"
+			"varbinary(32)", "integer"
 		};
 		
 		return SqlHelper.create(kTableUsers, columns, types);
@@ -205,5 +241,29 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 			.append(iU.getPersistenceID()).toString();
 		
 		return SqlHelper.update(kTableUsers, columns, values, whereClause);
-	}	
+	}
+	
+	private String buildCreateUserStatement() {
+		String[] columns = {
+			kColUsersAccessModes
+		};
+		
+		String[] values = {
+			String.valueOf(0)		// dummy value, so we can complete the INSERT
+		};
+		
+		return SqlHelper.insert(kTableUsers, columns, values);
+	}
+	
+	private String buildGetMaxIDQuery() {
+		return new StringBuffer(50).append("SELECT MAX(").append(kColUsersID)
+			.append(") FROM ").append(kTableUsers).toString();
+	}
+	
+	private String buildDeleteUserStatement(int iID) {
+		String whereClause = new StringBuffer(50).append(kColUsersID)
+			.append(" = ").append(iID).toString();
+		
+		return SqlHelper.delete(kTableUsers, whereClause);
+	}
 }
