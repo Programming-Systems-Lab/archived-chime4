@@ -27,10 +27,7 @@ public class VisualDataManager {
         if (dataStore == null) {
             dataStore = VemMapDAOFactory.getInstance().getDAO();
         }
-        
         mDataStore = dataStore;
-        
-        
     }
     
     public long getModel(long objectID, long typeID) {
