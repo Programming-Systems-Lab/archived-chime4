@@ -6,7 +6,9 @@ class EMRoom;
 
 //dependencies
 #include "EMElement.h"
+#include "EMRoomList.h"
 #include "EMDoor.h"
+#include "EMDoorContainer.h"
 #include "EMObject.h"
 #include "EMAvatar.h"
 #include "EMRoom.h"
@@ -61,7 +63,6 @@ class EnvironmentModeler
 		static void setCamera( ChimeID roomID, Coords location, Coords focus );
 
 	private:
-		static void clearHash( EMHash *hash, int size );
 
 		static EMModel *modelHash[EM_MODEL_HASH_SIZE];
 		static EMRoom *roomHash[EM_ROOM_HASH_SIZE];

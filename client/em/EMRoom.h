@@ -18,10 +18,15 @@ class EMRoom: public EMElement
 		EMObject *getObject( ChimeID objectID );
 		EMAvatar *getAvatar( ChimeID avatarID );
 
+		EMDoorContainer *getDoorList( void );
+		EMObject *getObjectList( void );
+		EMAvatar *getAvatarList( void );
+
 		void removeDoor( ChimeID doorID );
 		void removeObject( ChimeID objectID );
 		void removeAvatar( ChimeID avatarID );
 
+	protected:
 		EMDoorContainer *doors;
 		EMObject *objects;
 		EMAvatar *avatars;

@@ -4,24 +4,26 @@
 //dependencies
 #include "ChimeID.h"
 #include "EMCoords.h"
-#include "EMHash.h"
+#include "EMEntity.h"
 #include "EMModel.h"
 
 //element definition
-class EMElement: public EMHash
+class EMElement: public EMEntity
 {
 	public:
 		EMElement( ChimeID setID, Coords setDim, ChimeID modelID );
 		virtual ~EMElement( void );
 
 		void setModel( ChimeID setModelID );
-	
-		ChimeID elementID;
-		EMModel *model;
-		Coords dimensions;
+		EMModel *getModel( void );
+
+		Coords getDimensions( void );
 
 	private:
 		EMElement( void );
+
+		EMModel *model;
+		Coords dimensions;
 };
 
 #endif

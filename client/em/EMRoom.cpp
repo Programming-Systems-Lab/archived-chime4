@@ -18,36 +18,32 @@ void EMRoom::addDoor( EMDoor *addDoor )
 {
 	EMDoorContainer *temp;
 
-	temp = new EMDoorContainer;
+	temp = new EMDoorContainer( addDoor );
 
-	temp->door = addDoor;
-	temp->next = doors;
-
-	doors = temp;
+	doors = (EMDoorContainer *) EMRoomList::addToList( doors, temp );
 }
 
 void EMRoom::addObject( EMObject *addObject )
 {
-	addObject->room = this;
-	addObject->next = objects;
-	objects = addObject;
+	objects = (EMObject *) EMRoomList::addToList( objects, addObject );
 }
 
 void EMRoom::addAvatar( EMAvatar *addAvatar )
 {
-	addAvatar->room = this;
-	addAvatar->next = avatars;
-	avatars = addAvatar;
+	avatars = (EMAvatar *) EMRoomList::addToList( avatars, addAvatar );
 }
 
 EMDoor *EMRoom::getDoor( ChimeID doorID )
 {
 	EMDoorContainer *cur;
+	EMDoor *curDoor;
 
-	for( cur = doors; cur != NULL; cur = cur->next )
+	for( cur = doors; cur != NULL; cur = (EMDoorContainer *) cur->getNext() )
 	{
-		if( cur->door->elementID == doorID )
-			return cur->door;
+		curDoor = cur->getDoor();
+		
+		if( curDoor->getID() == doorID )
+			return curDoor;
 	}
 
 	return NULL;
@@ -57,9 +53,9 @@ EMObject *EMRoom::getObject( ChimeID objectID )
 {
 	EMObject *cur;
 
-	for( cur = objects; cur != NULL; cur = cur->next )
+	for( cur = objects; cur != NULL; cur = (EMObject *) cur->getNext() )
 	{
-		if( cur->elementID == objectID )
+		if( cur->getID() == objectID )
 			return cur;
 	}
 
@@ -70,40 +66,70 @@ EMAvatar *EMRoom::getAvatar( ChimeID avatarID )
 {
 	EMAvatar *cur;
 
-	for( cur = avatars; cur != NULL; cur = cur->next )
+	for( cur = avatars; cur != NULL; cur = (EMAvatar *) cur->getNext() )
 	{
-		if( cur->elementID == avatarID )
+		if( cur->getID() == avatarID )
 			return cur;
 	}
 
 	return NULL;
 }
 
+EMDoorContainer *EMRoom::getDoorList( void )
+{
+	return doors;
+}
+
+EMObject *EMRoom::getObjectList( void )
+{
+	return objects;
+}
+
+EMAvatar *EMRoom::getAvatarList( void )
+{
+	return avatars;
+}
+
 void EMRoom::removeDoor( ChimeID doorID )
 {
 	EMDoorContainer *cur;
 	EMDoorContainer *temp;
+	EMDoor *tempDoor;
+
+	if( doors == NULL )
+		return;
 
 	//here we remove the container and then delete it, only in this case
 	//because the container is just a utility object, the actual door will
 	//remain inside the door hash, so that it could possibly be used again.
 	//so again, elements must explicitly be cleared if the server wants them to
 	//be deallocated.
-	if( doors->door->elementID == doorID )
+	tempDoor = doors->getDoor();
+
+	if( tempDoor->getID() == doorID )
 	{
 		temp = doors;
-		doors = temp->next;
+		doors = (EMDoorContainer *) temp->getNext();
+
+		//clear the container
 		delete temp;
 	}
 	else
 	{
-		for( cur = doors; cur->next != NULL; cur = cur->next )
+		//go through the rest of them
+		for( cur = doors; cur->getNext() != NULL; cur = (EMDoorContainer *) cur->getNext() )
 		{
-			if( cur->next->door->elementID == doorID )
+			temp = (EMDoorContainer *) cur->getNext();
+			tempDoor = temp->getDoor();
+
+			if( tempDoor->getID() == doorID )
 			{
-				temp = cur->next;
-				cur->next = temp->next;
+				cur->setNext( temp->getNext() );
+
+				//clear the container
 				delete temp;
+
+				//break out, we're done.
 				break;
 			}
 		}
@@ -112,17 +138,23 @@ void EMRoom::removeDoor( ChimeID doorID )
 
 void EMRoom::removeObject( ChimeID objectID )
 {
+	EMObject *temp;
 	EMObject *cur;
 
-	if( objects->elementID == objectID )
-		objects = objects->next;
+	if( objects == NULL )
+		return;
+
+	if( objects->getID() == objectID )
+		objects = (EMObject *) objects->getNext();
 	else
 	{
-		for( cur = objects; cur->next != NULL; cur = cur->next )
+		for( cur = objects; cur->getNext() != NULL; cur = (EMObject *) cur->getNext() )
 		{
-			if( cur->next->elementID == objectID )
+			temp = (EMObject *) cur->getNext();
+
+			if( temp->getID() == objectID )
 			{
-				cur->next = cur->next->next;
+				cur->setNext( temp->getNext() );
 				break;
 			}
 		}
@@ -131,20 +163,25 @@ void EMRoom::removeObject( ChimeID objectID )
 
 void EMRoom::removeAvatar( ChimeID avatarID )
 {
+	EMAvatar *temp;
 	EMAvatar *cur;
 
-	if( avatars->elementID == avatarID )
-		avatars = avatars->next;
+	if( avatars == NULL )
+		return;
+
+	if( avatars->getID() == avatarID )
+		avatars = (EMAvatar *) avatars->getNext();
 	else
 	{
-		for( cur = avatars; cur->next != NULL; cur = cur->next )
+		for( cur = avatars; cur->getNext() != NULL; cur = (EMAvatar *) cur->getNext() )
 		{
-			if( cur->next->elementID == avatarID )
+			temp = (EMAvatar *) cur->getNext();
+
+			if( temp->getID() == avatarID )
 			{
-				cur->next = cur->next->next;
+				cur->setNext( temp->getNext() );
 				break;
 			}
 		}
 	}
-
 }

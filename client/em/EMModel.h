@@ -2,15 +2,17 @@
 #define __ENVIRONMENT_MODELER_MODEL__
 
 #include "ChimeID.h"
-#include "EMHash.h"
+#include "EMEntity.h"
 
-class EMModel: public EMHash
+class EMModel: public EMEntity
 {
 	public:
 		EMModel( char *file, ChimeID setID );
 		~EMModel( void );
 
-		ChimeID modelID;
+		void *getModelData( int *length );
+
+	protected:
 		void *modelData;
 		unsigned int modelDataLength;
 };

@@ -13,6 +13,7 @@ void EnvironmentModeler::shutdown( void )
 
 void EnvironmentModeler::placeRoom( ChimeID setID, Coords setDim, ChimeID setModel )
 {
+	//make sure we haven't already placed it
 
 }
 
@@ -79,27 +80,27 @@ void EnvironmentModeler::removeAvatar( ChimeID elementID )
 
 EMRoom *EnvironmentModeler::getRoom( ChimeID roomID )
 {
-
+	return NULL;
 }
 
 EMDoor *EnvironmentModeler::getDoor( ChimeID doorID )
 {
-
+	return NULL;
 }
 
 EMAvatar *EnvironmentModeler::getAvatar( ChimeID avatarID )
 {
-
+	return NULL;
 }
 
 EMObject *EnvironmentModeler::getObject( ChimeID objectID )
 {
-
+	return NULL;
 }
 
 EMModel *EnvironmentModeler::getModel( ChimeID modelID )
 {
-
+	return NULL;
 }
 
 void EnvironmentModeler::moveAvatar( ChimeID avatarID, Coords setCoords )
@@ -118,11 +119,6 @@ void EnvironmentModeler::flush( void )
 }
 
 void EnvironmentModeler::setCamera( ChimeID roomID, Coords location, Coords focus )
-{
-
-}
-
-void EnvironmentModeler::clearHash( EMHash *hash, int size )
 {
 
 }

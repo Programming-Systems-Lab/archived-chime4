@@ -7,20 +7,13 @@ class EMDoor: public EMElement
 	public:
 		EMDoor( ChimeID setID, ChimeID roomOne, ChimeID roomTwo,
 			Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel );
-		virtual ~EMDoor( void );
 
-		EMRoom *linkOne;
-		EMRoom *linkTwo;
+		EMRoom **getLinkRooms( void );
+		Coords *getLinkCoords( void );
 
-		Coords linkOneCoords;
-		Coords linkTwoCoords;
+	protected:
+		EMRoom *linkRooms[2];
+		Coords linkCoords[2];
 };
-
-struct EMDoorContainer
-{
-	struct EMDoorContainer *next;
-	class EMDoor *door;
-};
-typedef struct EMDoorContainer EMDoorContainer;
 
 #endif

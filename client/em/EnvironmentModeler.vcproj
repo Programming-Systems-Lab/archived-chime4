@@ -104,7 +104,13 @@
 				RelativePath="EMDoor.cpp">
 			</File>
 			<File
+				RelativePath="EMDoorContainer.cpp">
+			</File>
+			<File
 				RelativePath="EMElement.cpp">
+			</File>
+			<File
+				RelativePath="EMEntity.cpp">
 			</File>
 			<File
 				RelativePath="EMModel.cpp">
@@ -114,6 +120,9 @@
 			</File>
 			<File
 				RelativePath="EMRoom.cpp">
+			</File>
+			<File
+				RelativePath="EMRoomList.cpp">
 			</File>
 			<File
 				RelativePath="EnvironmentModeler.cpp">
@@ -132,10 +141,13 @@
 				RelativePath="EMDoor.h">
 			</File>
 			<File
+				RelativePath="EMDoorContainer.h">
+			</File>
+			<File
 				RelativePath="EMElement.h">
 			</File>
 			<File
-				RelativePath="EMHash.h">
+				RelativePath="EMEntity.h">
 			</File>
 			<File
 				RelativePath="EMModel.h">
@@ -145,6 +157,9 @@
 			</File>
 			<File
 				RelativePath="EMRoom.h">
+			</File>
+			<File
+				RelativePath="EMRoomList.h">
 			</File>
 			<File
 				RelativePath="EnvironmentModeler.h">

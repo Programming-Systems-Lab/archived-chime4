@@ -2,17 +2,21 @@
 #define __ENVIRONMENT_MODELER_AVATAR__
 
 //avatar definition
-class EMAvatar: public EMElement
+class EMAvatar: public EMElement, public EMRoomList
 {
 	public:
 		EMAvatar( ChimeID setID, ChimeID setRoom, Coords setDim,
 			Coords setCoords, ChimeID setModel );
-		virtual ~EMAvatar( void );
 
+		void setRoomCoords( Coords theCoords );
+		void setRoom( EMRoom *theRoom );
+
+		Coords getRoomCoords( void );
+		EMRoom *getRoom( void );
+
+	protected:
 		EMRoom *room;
 		Coords roomCoords;
-
-		class EMAvatar *next;
 };
 
 #endif
