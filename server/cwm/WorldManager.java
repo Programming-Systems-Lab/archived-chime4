@@ -1,6 +1,6 @@
-package psl.chime4.cwm;
+package psl.chime4.server.cwm;
 
-import psl.chime4.base.ChimeEvent;
+import psl.chime4.server.base.ChimeEvent;
 
 /**
  * This is a Helper method that provides an interface to EventProcessors 
@@ -9,7 +9,7 @@ import psl.chime4.base.ChimeEvent;
  * @author Azubuko Obele
  * @version 0.1
  **/
-public class WorldManagerHelper
+public class WorldManager
 {
    /**
     * Get an empty ChimeEvent. This can be used when an EventProcessor must

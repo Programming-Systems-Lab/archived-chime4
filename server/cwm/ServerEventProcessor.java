@@ -1,7 +1,7 @@
-package psl.chime4.cwm;
+package psl.chime4.server.cwm;
 
-import psl.chime4.base.ChimeException;
-import psl.chime4.base.ChimeEvent;
+import psl.chime4.server.base.ChimeException;
+import psl.chime4.server.base.ChimeEvent;
 
 import java.util.logging.Logger;
 

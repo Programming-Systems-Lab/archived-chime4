@@ -1,6 +1,8 @@
 package psl.chime4.server.rdf;
 
 
+import psl.chime4.server.data.Persistable;
+
 /**
  * A ResourceDescriptor is something that describes some kind of resource
  * in the Metaverse. A resource can be anything; an HTML file, a database, or
@@ -14,7 +16,7 @@ package psl.chime4.server.rdf;
  * @author Azubuko Obele
  * @version 0.1
  **/
-public interface ResourceDescriptor extends psl.chime4.data.Persistable
+public interface ResourceDescriptor extends Persistable
 {
    /**
     * All ResourceDescriptors are identified by a globally unique URI that
