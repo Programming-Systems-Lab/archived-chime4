@@ -7,7 +7,7 @@
 
 package psl.chime4.server.data;
 
-import java.io.StringReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -29,7 +29,8 @@ import psl.chime4.server.librarian.*;
  * @author Mark Ayzenshtat
  */
 public class DataServer {
-	public static final DIType kDirectoryType = new DIType("LibrarianSearch");
+	public static final DIType kLibrarianSearchMessageType
+    = new DIType("LibrarianSearch");
 	private static final ResourceDescriptor[] kZeroResDes =
 		new ResourceDescriptor[0];
 	
@@ -59,7 +60,7 @@ public class DataServer {
 		}
 		
 		// subscribe to directory service
-		mDirInterface.subscribe(mDirEventReceiver, kDirectoryType);
+		mDirInterface.subscribe(mDirEventReceiver, kLibrarianSearchMessageType);
 		
 		mInitialized = true;
 	}
@@ -73,7 +74,7 @@ public class DataServer {
 		}
 		
 		// unsubscribe from directory service
-		mDirInterface.unsubscribe(mDirEventReceiver, kDirectoryType);
+		mDirInterface.unsubscribe(mDirEventReceiver, kLibrarianSearchMessageType);
 		
 		mInitialized = false;
 	}
@@ -145,9 +146,24 @@ public class DataServer {
 		notifyLibrarianOfResult(result);
 	}
 	
-	private void librarianSearchNetworkDataStores(LibrarianRequest iReq) {
-		// TODO: Implement directory interface code here
-
+	private void librarianSearchNetworkDataStores(LibrarianRequest iReq) {		
+    // convert entire LibrarianRequest object into a byte array
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
+    
+    try {
+      ObjectOutputStream oos = new ObjectOutputStream(baos);        
+      oos.writeObject(iReq);
+    } catch (IOException ex) {
+      throw new
+        RuntimeException("Couldn't package librarian request for transport.");
+    }
+    
+    byte[] libReqAsBytes = baos.toByteArray();
+    
+    // publish library request for other data servers to discover
+    mDirInterface.publish(kLibrarianSearchMessageType, 
+      new DIMessageBody(libReqAsBytes));
+        
 /*
 		// save results to local data store using
 		// some intelligent persistence scheme
@@ -238,9 +254,54 @@ public class DataServer {
 		
 		return iRD;
 	}
+  
+  /**
+   * An implementation of the directory service <code>DIEventReceiver</code>
+   * interface, through which this data server communicates with other data
+   * servers across the network.
+   *
+   * @author Mark Ayzenshtat
+   */
+  private static class DataServerEventReceiver implements DIEventReceiver {
+    private DataServer mDataServer;
+
+    DataServerEventReceiver(DataServer iDataServer) {
+      mDataServer = iDataServer;
+    }
+
+    public void receiveMessage(DIMessage iMessage) {                
+      LibrarianRequest request;
+      ByteArrayInputStream bais = new ByteArrayInputStream(
+        iMessage.getBody().toBytes());
+
+      try {
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        request = (LibrarianRequest) ois.readObject();
+      } catch (Exception ex) {
+        throw new
+          RuntimeException(
+            "Couldn't unpackage librarian request from transport."
+          );
+      }
+      
+      mDataServer.librarianSearchLocalDataStore(request);
+      
+      // FIXME: We need to get the result, package it up, and send it back
+    }
+
+    public void receiveEvent(DIEvent iEvent) {
+      // we don't care about events
+    }
+
+    public void receiveResult(DIHost iResult) {
+      // we don't care about results
+    }
+  }
 	
 	public static void main(String[] args) {
 		DataServer ds = new DataServer();
+    
+    ds.startup();
 		
 		ResourceDescriptor rd = ResourceDescriptorFactory
 			.getInstance().newRD("text/html");		
@@ -261,5 +322,5 @@ public class DataServer {
     for (int i = 0; i < links.length; i++) {
       System.out.println(links[i]);
     }
-  }
+  }  
 }

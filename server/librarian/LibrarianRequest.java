@@ -7,6 +7,7 @@
 
 package psl.chime4.server.librarian;
 
+import java.io.Serializable;
 import java.net.URI;
 
 /**
@@ -16,7 +17,7 @@ import java.net.URI;
  *
  * @author Mark Ayzenshtat 
  */
-public class LibrarianRequest {
+public class LibrarianRequest implements Serializable {
 	private String mQuery;
 	private URI[] mURIs;
 	
