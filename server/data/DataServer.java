@@ -16,8 +16,6 @@ import org.jdom.input.*;
 import psl.chime.sienautils.*;	// for FRAX
 import psl.chime.frax.*;	// for FRAX
 import psl.chime4.server.data.metadata.*;
-import psl.chime4.server.data.metadata.ResourceDescriptor;
-import psl.chime4.server.data.metadata.ResourceDescriptorFactory;
 import psl.chime4.server.di.*;
 import psl.chime4.server.librarian.*;
 
