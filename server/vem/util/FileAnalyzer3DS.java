@@ -156,25 +156,26 @@ public class FileAnalyzer3DS extends FileAnalyzer
 
 		return out;
 	}
-}
+	
+	class Vertex {
+		public float x,y,z;
 
-
-class Vertex {
-	public float x,y,z;
-
-	public void setTo(Vertex a) {
-		x = a.x;
-		y = a.y;
-		z = a.z;
+		public void setTo(Vertex a) {
+			x = a.x;
+			y = a.y;
+			z = a.z;
+		}
 	}
+
+	class Box3D {
+		public Vertex mPointA, mPointB;
+
+		public Box3D(Vertex a, Vertex b)
+		{
+			mPointA = a;
+			mPointB = b;
+		}
+	}	
 }
 
-class Box3D {
-	public Vertex mPointA, mPointB;
 
-	public Box3D(Vertex a, Vertex b)
-	{
-		mPointA = a;
-		mPointB = b;
-	}
-}
