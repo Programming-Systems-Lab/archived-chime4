@@ -10,7 +10,7 @@ package psl.chime4.server.data;
 import java.sql.*;
 import psl.chime4.server.auth.User;
 import psl.chime4.server.vem.*;
-import psl.chime4.server.data.sql.*;
+import psl.chime4.server.data.sql.SqlHelper;
 
 /**
  * Implements VemMapDAO using a JDBC database connection
@@ -120,9 +120,10 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 			data.setModelID(rs.getInt(kColVMsShape));
 			data.setImageID(rs.getInt(kColVMsShape2D));
 			
-			// instantiate an empty VemMap object
+			// instantiate an new VemMap object
 			VemMap m = new VemMap(
-				rs.getInt(kColVMsUID), rs.getString(kColVMsPattern), data);			
+				rs.getInt(kColVMsUID), rs.getString(kColVMsPattern), 
+				rs.getInt(kColVMsPriority),	data);			
 			
 			// copy values from the result set into the User object
 			m.setPersistenceID(iID);
@@ -194,12 +195,13 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 	}	
 	
 
-    public int search(int iUID, String iPattern) throws DataAccessException {
+    public int search(int iUID, String iType, String iURI, VemType iVT) 
+	throws DataAccessException {
         Connection conn = getConnection();
 		ResultSet rs = null;
 		
         try {
-            prepareSearch(conn, iUID, iPattern);
+            prepareSearch(conn, iUID, iType, iURI, iVT);
             rs = searchStmt.executeQuery();
             if (rs.next()) {	// grab first row of the table
                 return rs.getInt(kColVMsMapID);
@@ -212,7 +214,7 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
         }
     }
 	
-    private void prepareSearch(Connection conn, int iU, String iP)
+    private void prepareSearch(Connection conn, int iU, String iT, String iURI, VemType iVT) 
     throws SQLException {
         if (searchStmt == null) {	// if first time use, create new statement
             String cols[] = {
@@ -221,17 +223,18 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
             
             String whereClause = 
 				"("+kColVMsUID+" = "+User.GLOBAL_ID+" OR "+kColVMsUID+" = '?') AND " +
-				"("+kColVMsPattern+" = '?' OR "+kColVMsPattern+" = '?')";
+				"("+kColVMsPattern+" = '?' OR "+kColVMsPattern+" = '?' OR "+kColVMsPattern+" = NULL) AND " +
+				"("+kColVMsType+" = '"+iVT.toInt()+"')";
             
             // order by priority (2nd column)
             searchStmt = conn.prepareStatement(
 				SqlHelper.select(cols, kTableVMs, whereClause, "2"));
         }
         
-        // parameter indexes refer to the ? in the whereClause string
+        // parameter indices refer to the ? in the whereClause string
         searchStmt.setInt(1, iU);
-        searchStmt.setString(2, iP);
-        searchStmt.setString(3, VemMap.getExtensionPattern(iP));
+        searchStmt.setString(2, iT);
+		searchStmt.setString(3, iURI);
     }	
 	
 	// query/statement builders -- methods that neatly assemble the SQL
@@ -273,7 +276,7 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 		String[] values = {
 			String.valueOf(iU.getUserID()),
 			String.valueOf(iU.getPriority()),
-			SqlHelper.prepareString(iU.getPattern()),
+			SqlHelper.prepareString(iU.getPattern()),	//FIXME: find out if mark made change i wanted in SQLHelper
 			String.valueOf(iU.getVemData().getType().toInt()),
 			SqlHelper.prepareString(iU.getVemData().getSubType() + ""),
 			String.valueOf(iU.getVemData().getModelID()),
