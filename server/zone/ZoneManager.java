@@ -22,7 +22,7 @@ import psl.chime4.server.auth.NetworkNode;
  **/
 
 
-public class ZoneManager {
+public class ZoneManager implements MessageDefinitions {
 
 
     /**
@@ -38,12 +38,13 @@ public class ZoneManager {
 
 
 
+
     /**
      * Creates a new zone manager object, given a repository for zone
      * settings. This repository is used throughout the zone server,
      * and thus no object should assume exclusive access to it.
      **/
-    public ZoneManager(ZoneSettings zs, DataManager dm) {
+    public ZoneManager(ZoneSettings zs, DataManager dm){
 	zoneSettings = zs;
 	dataManager = dm;
     }
@@ -58,8 +59,7 @@ public class ZoneManager {
      * does nothing more than perform the actual upgrade.
      **/
     public void addZoneService(NetworkNode chimeServer) {
-	PeerCommunicator.sendMessage(PeerCommunicator.START_ZONE_SERVICE,
-				     chimeServer);
+	PeerCommunicator.sendMessage(START_ZONE_SERVICE, chimeServer);
     }
 
 
@@ -70,8 +70,7 @@ public class ZoneManager {
      * Demotes the specified zone server back to a regular CHIME server.
      **/
     public void removeZoneService(NetworkNode zoneServer) {
-	PeerCommunicator.sendMessage(PeerCommunicator.STOP_ZONE_SERVICE,
-				     zoneServer);
+	PeerCommunicator.sendMessage(STOP_ZONE_SERVICE, zoneServer);
     }
 
 
@@ -175,8 +174,7 @@ public class ZoneManager {
 	else
 	    zoneSettings.addPrimaryZones(list, true);  // add to beginning
 
-	PeerCommunicator.sendMessage(PeerCommunicator.ACCEPT_ZONE_TRANSFER,
-				     zoneServer);
+	PeerCommunicator.sendMessage(ACCEPT_ZONE_TRANSFER, zoneServer);
 	dataManager.describeZoneOrganization();
     }
 
@@ -267,7 +265,7 @@ public class ZoneManager {
      * backup responsibilities to the local server. Accepts or rejects
      * the request accordingly.
      **/
-    public void handleZoneBackupRequest(Zone[] list, NetworkNode zoneServer,
+    public void acceptZoneBackupRequest(Zone[] list, NetworkNode zoneServer,
 					boolean firstBackup) {
 
 	// if (do not want responsibility) 
@@ -279,8 +277,7 @@ public class ZoneManager {
 	for (int i=0; i < list.length; i++) 
 	    zoneSettings.addBackupZone(list[i], firstBackup, true);
 
-	PeerCommunicator.sendMessage(PeerCommunicator.ACCEPT_ZONE_BACKUP,
-				     zoneServer);	
+	PeerCommunicator.sendMessage(ACCEPT_ZONE_BACKUP, zoneServer);
     }
 
 
@@ -364,4 +361,3 @@ public class ZoneManager {
 
 
 } // end ZoneManager class
-

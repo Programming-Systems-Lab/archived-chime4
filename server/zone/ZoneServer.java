@@ -1,9 +1,17 @@
 
-package psl.chime4.zone;
+package psl.chime4.server.zone;
 
 import java.io.*;
+import java.util.*;
+
+import psl.chime4.server.di.*;
 import psl.chime4.server.auth.AuthTicket;
 import psl.chime4.server.auth.NetworkNode;
+import psl.chime4.server.util.StringParser;
+import psl.chime4.server.zone.authority.*;
+import psl.chime4.server.zone.schemes.*;
+
+
 
 
 
@@ -21,7 +29,7 @@ import psl.chime4.server.auth.NetworkNode;
  * @version 1.0
  **/
 
-public class ZoneServer {
+public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
     private String username = null;   // network-level user id
@@ -30,6 +38,14 @@ public class ZoneServer {
     private Thread serverThread;
     private boolean runThread;
 
+    private ZoneSettings zoneLayout;
+    private DataManager dataManager;
+    private ZoneManager zoneManager;
+
+    private ZoneChangeAuthority zoneControl;
+    private BackupAuthority backupControl;
+
+    private DirectoryInterface di;  // network communication interface
 
 
 
@@ -69,6 +85,16 @@ public class ZoneServer {
     public ZoneServer() {
 	serverThread = null;
 	runThread = true;
+
+	zoneLayout = new ZoneSettings();
+	dataManager = new DataManager();
+	zoneManager = new ZoneManager(zoneLayout, dataManager);
+
+	di = null; // INTEGRATE: NEED TO SET DIRECTORY INTERFACE HERE
+
+	zoneControl = new DefaultZoneChangeAuthority(zoneManager, di);
+	backupControl = new DefaultBackupAuthority(zoneManager,dataManager,di);
+
     }
 
 
@@ -84,7 +110,7 @@ public class ZoneServer {
     public void startZoneServer() {
 	serverThread = new Thread() {
 		public void run() {
-		    processNetworkEvents();
+		    runMainThread();
 		}
 	    };
 	serverThread.start();
@@ -117,10 +143,83 @@ public class ZoneServer {
      * threads that run a zone server (see the monitorNetwork method for
      * information on the other thread).
      **/
-    private void processNetworkEvents() {
+    private void runMainThread() {
 	while (runThread) {
 	    try {new Thread().sleep(1000);} catch (Exception e) {}
 	}
+    }
+
+
+
+
+
+    public void receiveMessage(DIMessage msg) {
+
+	String msgBody = msg.getBody().getData();
+	Hashtable data = StringParser.parseKeyValueString(msgBody);
+	NetworkNode source = new NetworkNode(msg.getSender().toString(), null);
+
+	
+	if (msg.getType().equals(STOP_ZONE_SERVICE)) 
+	    stopZoneServer();
+
+	else if (msg.getType().equals(TRANSFER_ZONE)) { 
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    NetworkNode pn=(NetworkNode) retrieveObject(data, SET_PREVIOUS_NEIGHBOR);
+	    NetworkNode nn = (NetworkNode) retrieveObject(data, SET_NEXT_NEIGHBOR);
+	    zoneControl.handleZoneTransferRequest(list, source, pn, nn);
+	}
+	else if (msg.getType().equals(REJECT_ZONE_TRANSFER)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    zoneControl.handleZoneTransferRejection(list, source);
+	}
+	else if (msg.getType().equals(ACCEPT_ZONE_TRANSFER)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    zoneControl.handleZoneTransferAcceptance(list, source);
+	}
+	
+	
+	
+	else if (msg.getType().equals(REQUEST_PRIMARY_BACKUP)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    backupControl.handlePrimaryBackupRequest(list, source);
+	}
+	else if (msg.getType().equals(REQUEST_SECONDARY_BACKUP)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    backupControl.handleSecondaryBackupRequest(list, source);
+	}
+	else if (msg.getType().equals(OFFER_PRIMARY_BACKUP)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    backupControl.handlePrimaryBackupOffer(list, source);
+	}
+	else if (msg.getType().equals(OFFER_SECONDARY_BACKUP)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    backupControl.handleSecondaryBackupOffer(list, source);
+	}
+	else if (msg.getType().equals(REJECT_ZONE_BACKUP)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    backupControl.handleBackupRejection(list, source);
+	}
+	else if (msg.getType().equals(ACCEPT_ZONE_BACKUP)) {
+	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
+	    backupControl.handleBackupAcceptance(list, source);
+	}
+
+        //    - anything data manager related also
+    }
+
+
+
+
+
+    public void receiveEvent(DIEvent event) {
+    }
+
+
+
+
+
+    public void receiveResult(DIHost result) {
     }
 
 
@@ -208,6 +307,25 @@ public class ZoneServer {
 
 
 
+
+    private static Object retrieveObject(Hashtable h, String serialized) {
+	serialized = (String) h.get(serialized);
+	ByteArrayInputStream stream;
+	stream = new ByteArrayInputStream(serialized.getBytes());
+	ObjectInputStream in = new ObjectInputStream(stream);
+	Object o = in.readObject();
+	in.close();
+	return o;
+    }
+
+
+
+
+
 } // end ZoneServer class
+
+
+
+
 
 

@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.Vector;
 import java.util.Hashtable;
 
+import psl.chime4.server.data.*;
 import psl.chime4.server.di.*;
 import psl.chime4.server.util.StringParser;
 
@@ -43,6 +44,8 @@ public class AuthServer implements DIEventReceiver, MessageDefinitions {
     private boolean runThread;
 
     private DirectoryInterface di;  // network communication interface
+    private DataServer dataServer;  
+    UserDAO userDAO; 
 
     private byte[] privateKey = null;
     private byte[] publicKey = null;
@@ -90,6 +93,9 @@ public class AuthServer implements DIEventReceiver, MessageDefinitions {
 	runThread = true;
 
 	di = null; // INTEGRATE: NEED TO SET DIRECTORY INTERFACE HERE
+	
+	dataServer = new DataServer();
+	userDAO = null;
     }
 
 
@@ -101,6 +107,9 @@ public class AuthServer implements DIEventReceiver, MessageDefinitions {
      * service runs in its own thread.
      **/
     public void startAuthServer() {
+	dataServer.startup();
+	userDAO = dataServer.getDAOFactory().getDAO(UserDAO.class);
+
 	serverThread = new Thread() {
 		public void run() {
 		    runMainThread();
@@ -119,6 +128,7 @@ public class AuthServer implements DIEventReceiver, MessageDefinitions {
      **/
     public void stopAuthServer() {
 	runThread = false;
+	dataServer.shutdown();
     }
 
 
@@ -173,11 +183,14 @@ public class AuthServer implements DIEventReceiver, MessageDefinitions {
      * If no such username is known to the auth server, returns null
      **/
     private User getUserData(String username) {
-
-	// retrieve user info from data server here...	
-	// User ans = dataServer.load(username);
-	// return ans;
-	return null;
+	
+	try {
+	    User u = userDAO.load(username);
+	    return u;
+	}
+	catch (DataAccessException e) {
+	    return null;
+	}
     }
 
 
