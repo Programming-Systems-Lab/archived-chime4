@@ -86,6 +86,12 @@ public class DataServer {
 		return mDAOFactory;
 	}
 	
+	/**
+	 * Given a resource descriptor that contains only a protocol and a path,
+	 * this method queries Frax to fill in all of the other fields.
+	 *
+	 * @param iRD the resource descriptor to complete
+	 */
 	public void completeMetadata(ResourceDescriptor iRD) {
 		URI u = null;		
 		try {
@@ -196,7 +202,7 @@ public class DataServer {
 		} catch (Exception ex) {
 			throw new RuntimeException("Error querying FRAX.", ex);
 		}
-	}
+	}	
 	
 	private ResourceDescriptor resourceDescriptorForXML(String iXML) {
 		// TODO: Implement me		
