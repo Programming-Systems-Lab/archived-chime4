@@ -8,6 +8,7 @@
 package psl.chime4.server.vem;
 
 import psl.chime4.server.auth.User;
+import psl.chime4.server.data.Persistent;
 
 /**
  * <p>This object stores a mapping between a user and file pattern
@@ -23,7 +24,7 @@ import psl.chime4.server.auth.User;
  * @see psl.chime4.data.VemMapDAO
  */
 
-public class VemMap {
+public class VemMap implements Persistent {
 
 	/** the four possible priorities for VEM data mappings */
 	public static final int USER_EXPLICIT = 1;
@@ -31,27 +32,28 @@ public class VemMap {
 	public static final int USER_PATTERN = 3;
 	public static final int GLOBAL_PATTERN = 4;
 
-	private User mUser;     // the user this map is for, or User.GLOBAL
+	private int mUserID;     // the user this map is for, or User.GLOBAL
 	private String mPattern;// the filename or extension pattern to map
 	private VemData mData;  // the associated visual information
-
+	private int persistenceID;
+	
     /**
 	 * Default constructor.
 	 *
-	 * @param iU	the user for whom this map is being made (or GLOBAL_ID)
+	 * @param iUID	the user for whom this map is being made (or GLOBAL_ID)
 	 * @param iP	the complete URI for the object source, or a wildcard pattern
 	 *				(for mapping all objects with a particular extension)
 	 * @param iVD	the <code>VemData</code> describing the appearance of all
 	 *				such objects.
 	 */
-	public VemMap(User iU, String iP, VemData iVD) {
-		mUser = iU;
+	public VemMap(int iUID, String iP, VemData iVD) {
+		mUserID = iUID;
 		mPattern = iP;
 		mData = iVD;
     }
 
-	public User getUser() {
-		return mUser;
+	public int getUserID() {
+		return mUserID;
 	}
 
 	public String getPattern() {
@@ -70,13 +72,13 @@ public class VemMap {
 	{
 		int r;
 
-		if (mPattern == null || mUser == null) 
+		if (mPattern == null || mUserID == User.GLOBAL_ID) 
 			return 0;
 		
 		if (mPattern.indexOf('*') < 0) {  // if not a pattern
-		    r = mUser.getPersistenceID()==User.GLOBAL_ID ? GLOBAL_EXPLICIT : USER_EXPLICIT;
+		    r = mUserID==User.GLOBAL_ID ? GLOBAL_EXPLICIT : USER_EXPLICIT;
 		} else	{
-		    r = mUser.getPersistenceID()==User.GLOBAL_ID ? GLOBAL_PATTERN : USER_PATTERN;
+		    r = mUserID==User.GLOBAL_ID ? GLOBAL_PATTERN : USER_PATTERN;
 		}
 
 		return r;
@@ -94,4 +96,25 @@ public class VemMap {
 		int index = iStr.lastIndexOf(".");
 		return (index < 0) ? "" : "*" + iStr.substring(index);
 	}
+	
+	/**
+	 * Retrieves the unique ID that serves as a key to this object.
+	 *
+	 * @return this object's ID
+	 */
+	public int getPersistenceID()
+	{
+		return persistenceID;
+	}
+	
+	/**
+	 * Assigns the unique ID that serves as a key to this object.
+	 *
+	 * @param iID this object's ID
+	 */
+	public void setPersistenceID(int iID)
+	{
+		persistenceID = iID;
+	}
+	
 }

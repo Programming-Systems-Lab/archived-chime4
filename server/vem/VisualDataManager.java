@@ -25,7 +25,10 @@ public class VisualDataManager {
     /** Creates a new instance of VisualDataManager */
     public VisualDataManager() {
         if (dataStore == null) {
-            dataStore = VemMapDAOFactory.getInstance().getDAO();
+            
+			// FIXME : ask Mark for proper line here...
+			
+			//dataStore = VemMapDAOFactory.getInstance().getDAO();
         }
         mDataStore = dataStore;
     }
