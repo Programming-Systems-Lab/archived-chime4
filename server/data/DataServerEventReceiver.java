@@ -7,6 +7,8 @@
 
 package psl.chime4.server.data;
 
+import psl.chime4.server.di.*;
+
 /**
  * An implementation of the directory service <code>DIEventReceiver</code>
  * interface, through which this data server communicates with other data

@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 
 // non-jdk imports
+import psl.chime4.server.auth.AuthTicket;
+import psl.chime4.server.auth.User;
 import psl.chime4.server.vem.*;
 
 /**
@@ -28,10 +30,18 @@ public class JdbcDAOFactory implements DAOFactory {
 	JdbcDAOFactory() {
 		mDAOClassMap = new HashMap(20);
 		
+		// ResourceDescriptor
 		bindPersistentToDAO(ResourceDescriptor.class,
 			JdbcResourceDescriptorDAO.class);
 		
+		// VemMap
 		bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
+		
+		// AuthTicket
+		bindPersistentToDAO(AuthTicket.class, JdbcAuthTicketDAO.class);
+		
+		// User
+		this.bindPersistentToDAO(User.class, JdbcUserDAO.class);
 	}
 	
 	/**
