@@ -9,19 +9,7 @@ package psl.chime4.server.rdf;
  * @version 0.1
  **/
 public abstract class FileResourceDescriptor implements ResourceDescriptor
-{
-   /** the persistableID **/
-   private int persistableID_;
-   
-   /** String containing the URI **/
-   private String uri_;
-   
-   /** the resource type constant **/
-   private int resourceType_;
-   
-   /** whether the FileResourceDescriptor has been completed **/
-   private boolean completed_;
-   
+{  
    /** the time the file was created **/
    private long timeCreated_;
    
@@ -45,132 +33,12 @@ public abstract class FileResourceDescriptor implements ResourceDescriptor
     **/
    protected FileResourceDescriptor()
    {
-      persistableID_ = -1;
-      uri_ = "";
-      completed_ = false;
       timeCreated_ = -1;
       timeModified_ = -1;
       protocol_ = "";
       size_ = -1;
       fileType_ = "";
       contentType_ = "";
-   }
-   
-   /**
-    * Construct a base-initialized FileResourceDescriptor.
-    *
-    * @param persistableID the unique ID assigned to this ResourceDescriptor
-    *                      by the DataServer
-    * @param uri           the uri of the resource 
-    * @param completed     whether the metadata fields have been completed
-    * @param timeCreated   when the file was created
-    * @param timeModified  last time the file was modified
-    * @param protocol      protocol that makes the file available
-    * @param size          size of the file in bytes
-    * @param fileType      the type of the file
-    * @param contentType   the type of the contents of the file
-    **/
-   protected FileResourceDescriptor(int persistableID, String uri, 
-                                    int resourceType_, boolean completed, 
-                                    long timeCreated, long timeModified, 
-                                    String protocol, int size, 
-                                    String fileType, String contentType)
-   {
-      this.persistableID_ = persistableID;
-      this.uri_ = uri;
-      this.completed_ = completed;
-      this.timeCreated_ = timeCreated;
-      this.timeModified_ = timeModified;
-      this.protocol_ = protocol;
-      this.size_ = size;
-      this.fileType_ = fileType;
-      this.contentType_ = contentType;
-   }
-   
-   /**
-    * Get the persistableID for this ResourceDescriptor so it can be
-    * stored in the dataserver.
-    *
-    * @return persistableID assigned by the dataserver, -1 if unknown
-    **/
-   public int getPersistenceID()
-   {
-      return persistableID_;
-   }
-   
-   /**
-    * Set the persistableID for the ResourceDescriptor so it can be stored
-    * in the dataserver.
-    *
-    * @param persistableID persistable id used by the dataserver 
-    **/
-   public void setPersistenceID(int persistableID)
-   {
-      this.persistableID_ = persistableID;
-   }
-   
-   /**
-    * Get the resource type constant that describes the resource.
-    *
-    * @return resource-type constant describing the resource
-    **/
-   public int getResourceType()
-   {
-      return resourceType_;
-   }
-   
-   /**
-    * Set the resource type constant that describes the resource.
-    *
-    * @param resourceType resource type constant that describes the resource
-    **/
-   public void setResourceType(int resourceType)
-   {
-      this.resourceType_ = resourceType;
-   }
-   
-   /**
-    * Get the URI that this ResourceDescriptor is describing.
-    *
-    * @return uri for the resource pointed to by this ResourceDescriptor,
-    *             empty string if unknown
-    **/
-   public String getURI()
-   {
-      return uri_;
-   }
-   
-   /**
-    * Set the URI that this ResourceDescriptor is describing.
-    *
-    * @param uri URI for the Resource this ResourceDescriptor describes
-    **/
-   public void setURI(String uri)
-   {
-      this.uri_ = uri;
-   }
-   
-   /**
-    * Get the completed status for the ResourceDescriptor. The 
-    * ResourceDescriptor is completed if the DataServer has filled in all
-    * its metadata fields.
-    *
-    * @return completed status of the ResourceDescriptor
-    **/
-   public boolean isComplete()
-   {
-      return completed_;
-   }
-   
-   /**
-    * Set the completed status for the ResourceDescriptor.
-    *
-    * @param completed <code>true</code> iff the ResourceDescriptor has been
-    *                  completed by the DataServer.
-    **/
-   public void setComplete(boolean completed)
-   {
-      this.completed_ = completed;
    }
    
    /**

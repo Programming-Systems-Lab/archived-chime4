@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
 /**
  * This interface should be used to mark any class of objects that can be

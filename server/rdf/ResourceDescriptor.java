@@ -51,17 +51,17 @@ public interface ResourceDescriptor extends Persistable
    public void setComplete(boolean complete);
    
    /**
-    * Get the resource-type described by the resource.
+    * Return the resource type identifier. The type identifier is a string 
+    * that uniquely identifies a given type of resource. 
     *
-    * @return resource-type constant for the resource
+    * @return resource type identifier
     **/
-   public int getResourceType();
+   public String getTypeIdentifier();
    
    /**
-    * Set the resource-type that describes the resource.
+    * Set the resource type identfier.
     *
-    * @param resourceType resource-type constant describing this resource
+    * @param typeID resource type identifier string
     **/
-   public void setResourceType(int resourceType);
-   
+   public void setTypeIdentifier(String typeID);
 }
