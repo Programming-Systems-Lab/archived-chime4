@@ -1,5 +1,7 @@
 package psl.chime4.server.cwm.world;
 
+import psl.chime4.server.cwm.AbstractPersistentObject;
+
 /**
  * A WorldObjectView represents a view of an object in the world, literally
  * how it looks to observers.

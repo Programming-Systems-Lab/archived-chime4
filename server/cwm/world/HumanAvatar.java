@@ -19,7 +19,7 @@ public class HumanAvatar extends WorldObject
     **/
    public int getUID()
    {
-      return userID;
+      return uid;
    }
    
    /**

@@ -1,5 +1,7 @@
 package psl.chime4.server.cwm.world;
 
+import psl.chime4.server.cwm.AbstractPersistentObject;
+
 /**
 * A WorldObject represents an actual object that exists in the world. This 
 * might be a Room, Door, User or a piece of metadata.
