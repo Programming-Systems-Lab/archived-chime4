@@ -7,10 +7,12 @@
 
 package psl.chime4.server.data;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import org.jdom.*;
+import org.jdom.input.*;
 import psl.chime.sienautils.*;	// for FRAX
 import psl.chime.frax.*;	// for FRAX
 import psl.chime4.server.di.*;
@@ -94,14 +96,15 @@ public class DataServer {
 	 */
 	public void completeMetadata(ResourceDescriptor iRD) {
 		URI u = null;		
-		try {
-			u = new URI(iRD.getProtocol(), iRD.getPath(), null);
+		try {			
+			u = new URI(iRD.getProtocol().toLowerCase() + "://" + iRD.getPath());
 		} catch (URISyntaxException ex) {
 			throw new 
 				RuntimeException("Could not form URI from resource descriptor.");
 		}
 		
-		iRD = queryFrax(u);
+		String metaData = xmlQueryFrax(u);
+		iRD = fillRDFromXML(metaData, iRD);
 	}
 	
 	/**
@@ -186,26 +189,92 @@ public class DataServer {
 		notifyLibrarianOfResult(result);
 	}
 	
-	private ResourceDescriptor queryFrax(URI iTarget) {
+	private String xmlQueryFrax(URI iTarget) {
 		// right now, we need to construct a SienaObject to pass data to FRAX,
 		// which is awful and really disgusting but will have to remain
 		// until we replace it with WellWrittenFrax (tm) in Fall 2002
 		// NOTE: We just use a SienaObject as a container; we're not actually
 		//       putting any data on the Siena bus
-		SienaObject s = new SienaObject(iTarget.getScheme(), iTarget.toString(), 
-			"Chime4DataServer", null, null, null, false);
+		SienaObject s = new SienaObject(iTarget.getScheme(), iTarget.toString(),
+			"Chime4DataServer", null, null, null, false);		
 						
 		try {
 			FRAXProtLoader fpl = new FRAXProtLoader();
-			String xmlMetadata = fpl.runProtExpectingReturn(s);
-			return resourceDescriptorForXML(xmlMetadata);
+			String xmlMetadata = fpl.runProtExpectingReturn(s);			
+			
+			return xmlMetadata;
 		} catch (Exception ex) {
 			throw new RuntimeException("Error querying FRAX.", ex);
 		}
-	}	
+	}
 	
-	private ResourceDescriptor resourceDescriptorForXML(String iXML) {
-		// TODO: Implement me		
-		return null;
-	}	
+	private ResourceDescriptor queryFrax(URI iTarget) {
+		return fillRDFromXML(xmlQueryFrax(iTarget),
+			ResourceDescriptorFactory.getInstance().newRD(iTarget.getScheme()));
+	}
+	
+	/**
+	 * Given some XML from Frax and a ResourceDescriptor, this method parses
+	 * the XML and fills up the ResourceDescriptor fields accordingly.  This
+	 * method is pretty ugly (e.g. hardcoded tag names), but once NewFrax is
+	 * around, it will go the way of the dodo.
+	 */
+	private ResourceDescriptor fillRDFromXML(String iXML,
+			ResourceDescriptor iRD) {
+		System.out.println(iXML);
+				
+		Document doc = null;
+				
+		// create a Document object from the supplied XML string
+		try {			
+			SAXBuilder builder = new SAXBuilder();
+			doc = builder.build(new StringReader(iXML));
+		} catch (JDOMException ex) {
+			throw new RuntimeException("Could not build document from raw XML.");
+		}
+		
+		Element root = doc.getRootElement();
+		
+		///////////////////////////////////
+		// set fields in ResourceDescriptor
+		///////////////////////////////////
+		
+		// set type
+		iRD.setType(root.getAttribute("type").getValue());
+		
+		// set content type
+		iRD.setContentType(root.getChildTextTrim("Type"));
+		
+		// set size
+		try {
+			iRD.setSize(Integer.parseInt(root.getChildTextTrim("Size")));
+		} catch (NumberFormatException ex) {
+		}
+		
+		// set time created
+		try {
+			iRD.setTimeCreated(new Date(Long.parseLong(
+				root.getAttribute("createDate").getValue())));
+		} catch (NumberFormatException ex) {
+		}
+		
+		// set time last modified
+		try {
+			iRD.setTimeLastModified(new Date(Long.parseLong(
+				root.getChildTextTrim("Last-Modified"))));
+		} catch (NumberFormatException ex) {
+		}
+		
+		return iRD;
+	}
+	
+	public static void main(String[] args) {
+		DataServer ds = new DataServer();
+		
+		ResourceDescriptor rd = ResourceDescriptorFactory
+			.getInstance().newRD("http");		
+		rd.setPath("localhost:8080");
+		
+		ds.completeMetadata(rd);
+	}
 }

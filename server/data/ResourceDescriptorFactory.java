@@ -31,8 +31,8 @@ public class ResourceDescriptorFactory {
 		
 		// right now, these are hardcoded -- eventually, 
 		// they should be loaded as preferences
-		mProtocolMap.put("HTTP", "HttpResourceDescriptor");
-		mProtocolMap.put("LFS", "LfsResourceDescriptor");
+		mProtocolMap.put("HTTP", "psl.chime4.server.data.HttpResourceDescriptor");
+		mProtocolMap.put("LFS", "psl.chime4.server.data.LfsResourceDescriptor");
 	}
 
 	/**
@@ -51,14 +51,20 @@ public class ResourceDescriptorFactory {
 	 * @return a <code>ResourceDescriptor</code> object
 	 */
 	public ResourceDescriptor newRD(String iProtocol) {
-		String rdClassName = (String) mProtocolMap.get(iProtocol);
+		// OldFrax handles protocols in all CAPS -- until NewFrax, we comply
+		String protocolName = iProtocol.toUpperCase();
+		
+		String rdClassName = (String) mProtocolMap.get(protocolName);
 		if (rdClassName == null) {
 			rdClassName = kDefaultRDClassName;
 		}
 
 		try {
 			Class rdClass = Class.forName(rdClassName);
-			return (ResourceDescriptor) rdClass.newInstance();
+			ResourceDescriptor rd = (ResourceDescriptor) rdClass.newInstance();
+			rd.setProtocol(protocolName);
+			
+			return rd;
 		} catch (ClassNotFoundException ex) {
 			throw new RuntimeException(
 				"Cannot resolve a ResourceDescriptor subclass.", ex
