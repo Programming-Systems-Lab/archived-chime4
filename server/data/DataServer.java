@@ -7,6 +7,8 @@
 
 package psl.chime4.server.data;
 
+import psl.chime4.server.librarian.LibrarianRequest;
+
 /**
  * The <code>DataServer</code> class represents the central access point for
  * the public API, through which other components like the librarian, world
@@ -50,5 +52,16 @@ public class DataServer {
 	
 	public void completeMetadata(ResourceDescriptor iRD) {
 		// TODO: Implement me.
+	}
+	
+	/**
+	 * Carries out a librarian search.  The data server first checks its own
+	 * data store before contacting FRAX and other CHIME servers (via service
+	 * discovery) as needed.
+	 *
+	 * @param iReq an object that encapsulates the search constraints
+	 */
+	public void doLibrarianSearch(LibrarianRequest iReq) {
+		
 	}
 }
