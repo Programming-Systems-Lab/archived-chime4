@@ -3,6 +3,10 @@ package psl.chime4.server.auth;
 
 
 
+import java.net.*;
+
+
+
 
 
 /**
@@ -142,15 +146,27 @@ public class NetworkNode {
 
 
     /**
-     * Returns the "current server", same as 127.0.0.1 (localhost)
+     * Returns a new NetworkNode with IP/hostname info preset to the local
+     * system
      **/
-    public static NetworkNode localServer() {
-	return new NetworkNode("localhost", null);
+    public static NetworkNode localServer(String userID, AuthTicket auth) {
+	NetworkNode local = new NetworkNode(userID, auth);
+
+	try {
+	    InetAddress ipAddress = InetAddress.getLocalHost();
+	    local.setIPAddress(ipAddress.getHostAddress());
+	    local.setHostname(ipAddress.getCanonicalHostName());
+	}
+	catch (UnknownHostException e) {
+	    e.printStackTrace();
+	}
+
+	return local;
     }
 
 
+
+
+
 } // end NetworkNode class
-
-
-
 
