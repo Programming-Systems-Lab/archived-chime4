@@ -1,7 +1,8 @@
 
-package psl.chime4.zone;
+package psl.chime4.server.zone;
 
 
+import psl.chime4.server.auth.NetworkNode;
 
 
 
@@ -25,7 +26,21 @@ public class DataManager {
 
 
 
-    
+
+    /**
+     * Sends a listing to all subscribers of how this zone server's area
+     * of control is organized.  This consists of the total area covered,
+     * which zones cover which parts of the area, for each zone who the
+     * backup server(s) are, and who the primary servers for the adjoining
+     * areas to this server's area are.
+     **/
+    public void describeZoneOrganization() {
+    }
+
+
+
+
+
     /**
      * Subscribes the given user to receive notifications about zone events.
      * The concept of a user is generic, it can be a real user (client) or

@@ -1,9 +1,9 @@
 
-package psl.chime4.zone;
+package psl.chime4.server.zone;
 
 
 import java.util.*;
-
+import psl.chime4.server.auth.NetworkNode;
 
 
 
@@ -30,19 +30,19 @@ public class ZoneSettings {
     /**
      * List of current zones under primary responsibility of this server 
      **/
-    private ArrayList primaryList();
+    private ArrayList primaryList;
 
     /**
      * List of current zones under "first backup" responsibility of this
      * server
      **/
-    private ArrayList firstBackupList();
+    private ArrayList firstBackupList;
 
     /**
      * List of current zones under general backup responsibility of this
      * server
      **/
-    private ArrayList generalBackupList();
+    private ArrayList generalBackupList;
 
     /**
      * "Next" zone server, i.e. the zone server with a responsibility that
@@ -56,7 +56,7 @@ public class ZoneSettings {
      * "Previous" zone server.  Same concept as the next zone server, except
      * borders the beginning of the current area instead of the end.
      **/
-    private NetworkNode lastNeighbor;
+    private NetworkNode previousNeighbor;
 
 
 
@@ -71,7 +71,7 @@ public class ZoneSettings {
 	firstBackupList = new ArrayList();
 	generalBackupList = new ArrayList();
 	nextNeighbor = null;
-	lastNeighbor = null;
+	previousNeighbor = null;
     }
 
 
@@ -93,10 +93,16 @@ public class ZoneSettings {
 	if (zones == null)
 	    return;
 
-	if (beginning == true) 
+	if (beginning == true) {
+	    for (int i=0; i < zones.length; i++)
+		zones[i].setID(i);
 	    primaryList.add(0, Arrays.asList(zones));
-	else
+	}
+	else {
+	    for (int i=0; i < zones.length; i++)
+		zones[i].setID(i+primaryList.size());
 	    primaryList.add(Arrays.asList(zones));
+	}
     }
 
 
@@ -116,10 +122,14 @@ public class ZoneSettings {
     public void addPrimaryZone(Zone zone, boolean beginning) {
 	if (zone == null)
 	    return;
-	else if (beginning == true)
+	else if (beginning == true) {
+	    zone.setID(0);
 	    primaryList.add(0, zone);
-	else
+	}
+	else {
+	    zone.setID(primaryList.size());
 	    primaryList.add(zone);
+	}
     }
 
 

@@ -1,7 +1,8 @@
 
-package psl.chime4.zone;
+package psl.chime4.server.zone;
 
 
+import psl.chime4.server.auth.NetworkNode;
 
 
 
@@ -32,6 +33,8 @@ public class ZoneManager {
     private ZoneSettings zoneSettings;
 
 
+    private DataManager dataManager;
+
 
 
 
@@ -40,8 +43,9 @@ public class ZoneManager {
      * settings. This repository is used throughout the zone server,
      * and thus no object should assume exclusive access to it.
      **/
-    public ZoneManager(ZoneSettings zs) {
+    public ZoneManager(ZoneSettings zs, DataManager dm) {
 	zoneSettings = zs;
+	dataManager = dm;
     }
 
 
@@ -101,16 +105,73 @@ public class ZoneManager {
      *                      zone responsibility allocated to it.
      **/
     public void initiateZoneTransfer(Zone[] list, NetworkNode zoneServer) {
-	// 1) Communicate to zone server: take this (primary|fbackup|gbackup)
-	//    responsibility for this list of zones			       
-	// 2) See if the zone server is our neighbor (check if beginning
-	//    or end of list matches with next/previous neighbor as 
-	//    appropriate).  If so and list isn't exhaustive, no neighbor
-	//    changing.  If so and list is exhaustive, "forward through"
-	//    your current neighbor as dest's new neighbor.  If dest zone
-	//    server is not already a neighbor, assume that it is "new"
-	//    and will fit in between current server and neighbor.
 
+	Zone[] allZones = zoneSettings.getPrimaryZones();
+	NetworkNode prevNeighbor = zoneSettings.getPreviousNeighbor();
+	NetworkNode nextNeighbor = zoneSettings.getNextNeighbor();
+
+	if ((list == null) || (allZones == null) || (zoneServer == null)) 
+	    return;
+
+	// If we're removing all our zones, then we should "forward on"
+	// our neighboring zone server to our other neighbor.  If the
+	// new server isn't already a neighbor, we assume that it will
+	// fully inherit our existing previous and next neighbors
+	if (list.length == allZones.length) {
+	    if (zoneServer.equals(prevNeighbor))        prevNeighbor = null;
+	    else if (zoneServer.equals(nextNeighbor))   nextNeighbor = null;
+	}
+
+	// Otherwise, if we're removing just some of our zones...
+	else if (list.length < allZones.length) {
+	    // moving to neighbor
+	    if (zoneServer.equals(prevNeighbor) || 
+		zoneServer.equals(nextNeighbor)) {
+		prevNeighbor = null;
+		nextNeighbor = null;
+	    }
+
+	    // "inserting" new zone server
+	    else if (list[0].equals(allZones[0]))
+		nextNeighbor = NetworkNode.localServer();
+	    else if (list[list.length-1].equals(allZones[allZones.length-1]))
+		prevNeighbor = NetworkNode.localServer();
+	    else {  // internal transfer (which doesn't make much sense)
+		nextNeighbor = NetworkNode.localServer();
+		prevNeighbor = NetworkNode.localServer();
+	    }
+	}
+
+	PeerCommunicator.initiateZoneTransfer(list, zoneServer, 
+					      prevNeighbor, nextNeighbor);
+    }
+
+
+
+
+
+    /**
+     * Receive a request from another zone server that wishes to transfer
+     * zone responsibilities to the local server and accept or reject
+     * accordingly.
+     **/
+    public void handleZoneTransferRequest(Zone[] list, NetworkNode zoneServer,
+					  NetworkNode newPrevNeighbor,
+					  NetworkNode newNextNeighbor) {
+
+	//	if (do not want responsibility) {
+	//         PeerCommunicator.sendMessage
+	//         (PeerCommunicator.REJECT_ZONE_TRANSFER, zoneServer);
+	//	}
+
+	if (zoneServer.equals(zoneSettings.getNextNeighbor()))
+	    zoneSettings.addPrimaryZones(list, false); // add at end
+	else
+	    zoneSettings.addPrimaryZones(list, true);  // add at beginning
+
+	PeerCommunicator.sendMessage(PeerCommunicator.ACCEPT_ZONE_TRANSFER,
+				     zoneServer);
+	dataManager.describeZoneOrganization();
     }
 
 
@@ -126,13 +187,31 @@ public class ZoneManager {
      * @param zoneServer - server to transfer responsibility to
      **/
     public void completeZoneTransfer(Zone[] list, NetworkNode zoneServer) {
-	// 1) Using data manager, communicate new (primary|fbackup|gbackup)
-	// server to ALL subscribers in ALL zones in the list
-	// 2) After slight delay (?) to let them go, remove zones from
-	// appropriate list internally.  Note that during this delay
-	// the data manager thread should still be able to run and handle
-	// users
-	// 3) Update next/previous neighbor as appropriate
+	// 1) Subscribe to new primary server (so users still receive
+	//    appropriate data) as a backup before they have unsubscribed.  
+	//    This feature not currently implemented.
+
+	if ((list == null) || (list.length == 0) || (zoneServer == null))
+	    return;
+
+	// Update neighbor information as necessary (if inserting a new
+	// zone server in between local server and an existing neighbor)
+	Zone[] allZones = zoneSettings.getPrimaryZones();
+	if (!((zoneServer.equals(zoneSettings.getNextNeighbor()) || 
+	       (zoneServer.equals(zoneSettings.getPreviousNeighbor()))))) {
+
+	    if (list[0].equals(allZones[0]))
+		zoneSettings.setPreviousNeighbor(zoneServer);
+	    else if (list[list.length-1].equals(allZones[allZones.length-1]))
+		zoneSettings.setNextNeighbor(zoneServer);
+	}
+
+	// Internally remove our zone data
+	for (int i=0; i < list.length; i++)
+	    zoneSettings.removePrimaryZone(list[i]);
+
+	// Notify our subscribers about the change
+	dataManager.describeZoneOrganization();
     }
 
 
@@ -168,7 +247,7 @@ public class ZoneManager {
      *                       this server's primary responsibility or zones
      *                       are not sequential, nothing is done
      **/
-    public void mergeZones(Zone zone1, zone zone2) {
+    public void mergeZones(Zone zone1, Zone zone2) {
 	// 1) Check that zone1 and zone2 appear in primary next to each other
 	// 2) Merge together with new name and update primary list
 	// 3) Using data manager, communicate to users in both zones their
@@ -178,6 +257,11 @@ public class ZoneManager {
 
 
 } // end ZoneManager class
+
+
+
+
+
 
 
 
