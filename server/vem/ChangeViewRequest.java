@@ -4,7 +4,7 @@
  * Created on March 29, 2002, 1:31 PM
  */
 
-package psl.server.chime4.vem;
+package psl.chime4.server.vem;
 
 import java.beans.*;
 

@@ -7,6 +7,8 @@
 package psl.chime4.server.vem;
 
 import psl.chime4.server.data.*;
+import psl.chime4.server.cwm.world.*;
+import psl.chime4.server.vem.util.*;
 
 /**
  * Public API interface to the server side VEM (Visual Environment Modeler)
@@ -15,39 +17,42 @@ import psl.chime4.server.data.*;
  */
 public class VisualDataManager {
     
-    /** Singleton object  */
-    private static VemMapDAO dataStore;
     private VemMapDAO mDataStore;
-    
-    public long mUser;
+    public int mUserID;
     public String mTheme;
     
-    /** Creates a new instance of VisualDataManager */
-    public VisualDataManager() {
-        if (dataStore == null) {
-            
-			// FIXME : ask Mark for proper line here...
-			
-        }
-        mDataStore = dataStore;
-    }
+    /**
+	 *	Creates a new instance of VisualDataManager 
+	 */
+    public VisualDataManager(DAOFactory iFactory) {
+		VemMapDAO mDataStore = (VemMapDAO) iFactory.getDAO(VemMap.class);
+		mUserID = psl.chime4.server.auth.User.GLOBAL_ID;
+		mTheme = null;
+	}
     
-    public long getModel(long objectID, long typeID) {
-        return 0;
-    }
-    
-    public long getModel2D(long objectID, long typeID) {
-        return 0;
-    }
-
-    public void setUser(long userID) {
-        this.mUser = userID;
+    public void setUserID(int userID) {
+        this.mUserID = userID;
     }
     
     public void setTheme(String themeName) {
         this.mTheme = themeName;
     }
     
-    public void doChangeRequest(ChangeViewRequest cvr) {
-    }  
+	private ResourceFile getResourceFileFor(MetadataWorldObject mdwo) 
+	throws DataAccessException
+	{
+		ResourceDescriptor rd = mdwo.getMetadata();
+		String objectURL = rd.getPath();
+		String contentType = rd.getContentType();
+		ResourceFileManager rfm = ResourceFileManager.getInstance();
+		
+		int mappingID, resourceID;
+		VemMap vmap;
+		
+		mappingID = mDataStore.search(mUserID, objectURL, contentType, VemType.COMPONENT);
+		vmap = (VemMap) mDataStore.load(mappingID);
+		resourceID = vmap.getVemData().getModelID();
+		
+		return rfm.getResourceFile(resourceID);
+	}
 }
