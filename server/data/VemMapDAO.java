@@ -7,6 +7,7 @@
 
 package psl.chime4.server.data;
 
+import psl.chime4.server.auth.User;
 import psl.chime4.server.vem.*;
 
 /**

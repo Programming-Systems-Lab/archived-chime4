@@ -7,7 +7,7 @@
 
 package psl.chime4.server.vem;
 
-import psl.chime4.server.data.User;
+import psl.chime4.server.auth.User;
 
 /**
  * <p>This object stores a mapping between a user and file pattern

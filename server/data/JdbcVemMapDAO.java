@@ -8,6 +8,7 @@
 package psl.chime4.server.data;
 
 import java.sql.*;
+import psl.chime4.server.auth.User;
 import psl.chime4.server.vem.*;
 import psl.chime4.server.data.sql.*;
 
