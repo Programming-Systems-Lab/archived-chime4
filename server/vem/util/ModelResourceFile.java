@@ -15,7 +15,7 @@ import java.io.*;
 public class ModelResourceFile extends ResourceFile
 {
 	// global flags
-	public final static boolean DEBUG = true;
+	public final static boolean DEBUG = false;
 
 	// 3DS Chunk Flags
 	public final static int CHUNK_MAIN		= 0x4d4d; 

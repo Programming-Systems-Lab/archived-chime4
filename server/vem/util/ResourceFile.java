@@ -11,6 +11,7 @@ import java.util.zip.Checksum;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.File;
+
 /**
  *	Stores meta data about a resource file (either a model or image).
  *
@@ -26,9 +27,12 @@ public class ResourceFile
 	/** Holds value of property checksum. */
 	private long checksum;
 	
-	/** Creates a new instance of ResourceFile */
-	public ResourceFile(String iRelativePath) throws IOException
-	{
+	/** 
+	 *	Creates a new instance of ResourceFile 
+	 *	
+	 *	@param	iRelativePath	the relative path name of the file
+	 */
+	public ResourceFile(String iRelativePath) throws IOException {
 		setRelativePath(iRelativePath);
 	}
 	
@@ -40,8 +44,11 @@ public class ResourceFile
 		return this.relativePath;
 	}
 	
-	/** Setter for property relativePath.
-	 * @param relativePath New value of property relativePath.
+	/** 
+	 *	Setter for property relativePath.
+	 *	Automatically updates the checksum property.
+	 *
+	 *	@param relativePath New value of property relativePath.
 	 */
 	public void setRelativePath(String relativePath) throws IOException
 	{
@@ -78,12 +85,32 @@ public class ResourceFile
 		return checksum.getValue();	
 	}		
 	
-	/** Getter for property fullPath.
-	 * @return Value of property fullPath.
+	/** 
+	 *	Getter for property fullPath.
+	 *	Calls on the ResourceFileManager to return the base directory.
+	 *
+	 *	@return Value of property fullPath.
 	 */
 	public String getFullPath()
 	{
 		String base = ResourceFileManager.getInstance().getBaseDir();
-		return base + File.pathSeparator + getRelativePath();
+		return base + File.separator + ResourceFileManager.kResourceDir +
+			File.separator + getRelativePath();
 	}
+	
+	/** 
+	 *	Getter for property resourceID.
+	 *	This is unique numeric identifier for resource. It should be unique
+	 *	across all servers and clients.
+	 *
+	 *	This implementation simply uses the checksum of the file, but this can
+	 *	be changed to suit future needs.
+	 *
+	 * @return Value of property resourceID.
+	 */
+	public int getResourceID()
+	{
+		return (int) this.checksum;
+	}
+	
 }

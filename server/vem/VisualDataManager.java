@@ -28,7 +28,6 @@ public class VisualDataManager {
             
 			// FIXME : ask Mark for proper line here...
 			
-			//dataStore = VemMapDAOFactory.getInstance().getDAO();
         }
         mDataStore = dataStore;
     }
@@ -41,12 +40,6 @@ public class VisualDataManager {
         return 0;
     }
 
-    // Will declare Environment class later
-    /*
-    public Environment getEnvironment(long locationID) {
-    }
-    */
-    
     public void setUser(long userID) {
         this.mUser = userID;
     }
@@ -56,15 +49,5 @@ public class VisualDataManager {
     }
     
     public void doChangeRequest(ChangeViewRequest cvr) {
-    }
-    
-    /*
-    public static VisualDataManager getInstance() {
-        if (mVDM == null) {
-            mVDM = new VisualDataManager();
-        }
-        
-        return mVDM;
-    }   
-    */   
+    }  
 }

@@ -27,14 +27,14 @@ import psl.chime4.server.data.Persistent;
 public class VemMap implements Persistent {
 
 	/** the four possible priorities for VEM data mappings */
-	public static final int USER_EXPLICIT = 1;
+	public static final int USER_EXPLICIT	= 1;
 	public static final int GLOBAL_EXPLICIT = 2;
-	public static final int USER_PATTERN = 3;
-	public static final int GLOBAL_PATTERN = 4;
+	public static final int USER_PATTERN	= 3;
+	public static final int GLOBAL_PATTERN	= 4;
 
-	private int mUserID;     // the user this map is for, or User.GLOBAL
-	private String mPattern;// the filename or extension pattern to map
-	private VemData mData;  // the associated visual information
+	private int mUserID;		// the user this map is for, or User.GLOBAL
+	private String mPattern;	// the filename or extension pattern to map
+	private VemData mData;		// the associated visual information
 	private int persistenceID;
 	
     /**
