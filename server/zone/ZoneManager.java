@@ -225,6 +225,102 @@ public class ZoneManager {
 
 
     /**
+     * Begins the process of requesting backup services by a specified
+     * zone server.  The entire process of doing this is broken down into
+     * two methods (on the originating side) and consists of the following
+     * operations:
+     *
+     *  1) Assign backup responsibility for the given list to the specified
+     *     zone server. (initiateZoneBackup method)
+     *  2) Receive acknowledgement and acceptance of backup responsibility
+     *     from remote zone server. (completeZoneBackup method)
+     *  3) Keep record of backup server, issue new zone organization
+     *     to all subscribers so they can update themselves as appropriate.
+     *
+     *  @param list - list of zones for the given zone server to backup
+     *  @param zoneServer - server to receive backup responsibility.  
+     *  @param firstbackup - if true, the specified zone server should
+     *                         provide first backup responsibilities 
+     *                         (in which case it takes over as the primary
+     *                         server if the original server dies).  If
+     *                         false, the specified zone server should
+     *                         provide passive backup responsibilities.
+     **/
+    public void initiateZoneBackup(Zone[] list, NetworkNode zoneServer,
+				   boolean firstBackup) {
+
+	if ((list == null) || (list.length == 0) || (zoneServer == null))
+	    return;
+
+	if (firstBackup)
+	    PeerCommunicator.requestPrimaryBackup(list, zoneServer);
+	else
+	    PeerCommunicator.requestSecondaryBackup(list, zoneServer);
+    }
+
+
+
+
+
+    /**
+     * Receive a request from another zone server that wishes to assign
+     * backup responsibilities to the local server. Accepts or rejects
+     * the request accordingly.
+     **/
+    public void handleZoneBackupRequest(Zone[] list, NetworkNode zoneServer,
+					boolean firstBackup) {
+
+	// if (do not want responsibility) 
+	//   PeerCommunicator.sendMessage
+	//	(PeerCommunicator.REJECT_ZONE_BACKUP, zoneServer);
+
+	
+	// Accept request
+	for (int i=0; i < list.length; i++) 
+	    zoneSettings.addBackupZone(list[i], firstBackup, true);
+
+	PeerCommunicator.sendMessage(PeerCommunicator.ACCEPT_ZONE_BACKUP,
+				     zoneServer);	
+    }
+
+
+
+
+
+    /**
+     * Complete the process of assigning backup responsibilities to
+     * a remote zone server.  See the @see initiateZoneBackup method
+     * for a complete description of how this process works.
+     *
+     * @param list - list of zones to be transferred.
+     * @param zoneServer - server to transfer responsibility to
+     * @param firstBackup - if true, the remote server provides first
+     *                        backup responsibilities for the set of zones.
+     *                        if false, it provides generic (passive)
+     *                        backup responsibilities.
+     **/
+    public void completeZoneBackup(Zone[] list, NetworkNode zoneServer,
+				   boolean firstBackup) {
+
+	if ((list == null) || (list.length == 0))
+	    return;
+
+	for (int i=0; i < list.length; i++) {
+	    if (firstBackup)
+		list[i].setFirstBackupServer(zoneServer);
+	    else
+		list[i].setSecondBackupServer(zoneServer);
+	}
+
+	// Notify our subscribers about the change
+	dataManager.describeZoneOrganization();
+    }
+
+
+
+
+
+    /**
      * Splits the specified zone (assumed to be under this server's 
      * primary responsibility) into two zones and communicates information
      * appropriately.
@@ -268,9 +364,4 @@ public class ZoneManager {
 
 
 } // end ZoneManager class
-
-
-
-
-
 

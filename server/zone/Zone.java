@@ -18,6 +18,9 @@ public class Zone {
 
 
     private int zoneID;
+    private NetworkNode primaryServer;
+    private NetworkNode firstBackupServer;
+    private NetworkNode secondBackupServer;
 
 
     // 90% of a zone's data is the same as a CHIME world.  The other 10%
@@ -25,6 +28,9 @@ public class Zone {
     // to be filled in at a later date.
     public Zone() {
 	zoneID = -1;
+	primaryServer = null;
+	firstBackupServer = null;
+	secondBackupServer = null;
     }
 
 
@@ -36,11 +42,37 @@ public class Zone {
     public int getID() {
 	return zoneID;
     }
-    
+
+
+    public void setPrimaryServer(NetworkNode zs) {
+	primaryServer = zs;
+    }
+
+
+    public NetworkNode getPrimaryServer() {
+	return primaryServer;
+    }
+
+
+    public void setFirstBackupServer(NetworkNode zs) {
+	firstBackupServer = zs;
+    }
+
+
+    public NetworkNode getFirstBackupServer() {
+	return firstBackupServer;
+    }
+
+
+    public void setSecondBackupServer(NetworkNode zs) {
+	secondBackupServer = zs;
+    }
+
+
+    public NetworkNode getSecondBackupServer() {
+	return secondBackupServer;
+    }
+
+
 } // end Zone class
-
-
-
-
-
 
