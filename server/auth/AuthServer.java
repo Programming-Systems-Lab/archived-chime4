@@ -136,7 +136,7 @@ public class AuthServer {
     public AuthTicket authenticateUser(String userid, byte[] authCode)
 	throws AuthFailedException {
 
-	UserData userInfo = getUserData(userid);
+	User userInfo = getUserData(userid);
 	if (userInfo == null)
 	    throw new AuthFailedException();
 	else {
@@ -167,8 +167,8 @@ public class AuthServer {
      * Returns a full user-entry listing for the specified username.  
      * If no such username is known to the auth server, returns null
      **/
-    private UserData getUserData(String username) {
-	UserData ans = new UserData();
+    private User getUserData(String username) {
+	User ans = new User();
 	// retrieve user info from data server here...
 	return ans;
     }
