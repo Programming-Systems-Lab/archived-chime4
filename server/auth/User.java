@@ -27,6 +27,9 @@ public class User implements Persistent {
     public static int CHIMESERVER = 2;
     public static int ZONESERVER = 4;
     public static int AUTHSERVER = 8;
+		
+		// maintain compatibility with VEM code
+		public static final int GLOBAL_ID = 0;
 
 
     private int persistenceID;
