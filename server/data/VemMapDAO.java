@@ -32,17 +32,8 @@ import psl.chime4.server.vem.*;
  * @author Vladislav Shchogolev
  * @version 1.0
  */
-public interface VemMapDAO //extends DataAccessObject
+public interface VemMapDAO extends DataAccessObject
 {
-	/**
-	 * Saves the given VEM mapping to the backing data store.
-	 *
-	 * @param iVM the VEM mapping to save
-	 * @exception DataAccessException if this operation cannot complete
-	 * due to a failure in the backing store
-	 */
-	public void store(VemMap iVM) throws DataAccessException;
-
 	/**
 	 * Loads the VEM mapping for the given User ID and file pattern from the
 	 * backing data store.
@@ -54,5 +45,5 @@ public interface VemMapDAO //extends DataAccessObject
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
-	public VemMap load(User iU, String iPattern) throws DataAccessException;
+	public VemMap search(int iUID, String iPattern) throws DataAccessException;
 }
