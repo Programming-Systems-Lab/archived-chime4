@@ -4,7 +4,7 @@ package psl.chime4.server.cebs;
  * The EventDispatcherThread removes incoming Events from the queue and 
  * passes them on to registered EventHandlers.
  *
- * @author Azubuko 
+ * @author Azubuko Obele
  * @version 0.1
  **/
 class EventDispatcherThread extends Thread
@@ -24,7 +24,7 @@ class EventDispatcherThread extends Thread
      * @param blockingQueue the queue to remove incoming events from
      * @param eventSystem   the system that contains event handlers
      * @throws IllegalArgumentException
-     *         if <code>blockingQueue</code> or <code>eventReciever</code> 
+     *         if <code>blockingQueue</code> or <code>eventSystem</code> 
      *         is <code>null</code>
      **/
     EventDispatcherThread(BlockingEventQueue blockingQueue, 
@@ -42,7 +42,8 @@ class EventDispatcherThread extends Thread
     }
     
     /**
-     * Startup the EventDispatcherThread so it will now begin running.
+     * Start the EventDispatcherThread. It will now begin removing events 
+     * from the events queue and passing them on to to Event Handlers.
      **/
     public void startup()
     {
@@ -71,11 +72,19 @@ class EventDispatcherThread extends Thread
                 // remove the next event
                 Event event = incomingEvents.get();
                 
-                // get the correct EventHandler listening to this topic
-                // and from this server
+                // get the event routing information
                 String topic = event.getString("xxx.event.topic");
                 String host = event.getString("xxx.event.source.server.host");
                 int port = event.getInteger("xxx.event.source.server.port");
+                
+                // make sure that routing information was added to the event
+                if ((topic == null) || (host == null) || (port < 0))
+                {
+                   String msg = "event contained no routing information";
+                   throw new IllegalStateException(msg);
+                }
+                
+                // get the correct event handler
                 EventHandler handler = 
                     eventSystem.getEventHandler(host, port, topic);
                 

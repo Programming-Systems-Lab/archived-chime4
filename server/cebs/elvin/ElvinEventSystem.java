@@ -2,7 +2,7 @@ package psl.chime4.server.cebs.elvin;
 
 import psl.chime4.server.cebs.Event;
 import psl.chime4.server.cebs.CebsEventSystem;
-import psl.chime4.server.cebs.CEBSException;
+import psl.chime4.server.cebs.CebsException;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -22,7 +22,9 @@ import org.elvin.je4.Subscription;
  * time a client subscribes and unsubscribes from a topic a new Subscription
  * object is created. This is bad, because each time a client enters and 
  * leaves a room it must subscribe/unsubscribe from a topic. This means 
- * Subscription objects should be cached.
+ * Subscription objects should be cached. This class could be heavily 
+ * optimized to reuse Subscription objects as well as perhaps do some other
+ * basic optimizations.
  *
  * @author Azubuko Obele
  * @version 0.1
@@ -45,13 +47,13 @@ public class ElvinEventSystem extends CebsEventSystem
     * @param port the port of the event server process
     * @throws IllegalArgumentException
     *         if <code>host</code> is <code>null</code> 
-    * @throws CEBSException
+    * @throws CebsException
     *         if the connection could not be made
     * @throws IllegalStateException
     *         if already connected to the event server
     **/
    protected void openRealConnection(String host, int port) 
-      throws CEBSException
+      throws CebsException
    {
       // check for null
       if (host == null)
@@ -64,7 +66,7 @@ public class ElvinEventSystem extends CebsEventSystem
       String key = host + ":" + port;
       if (connectionMap.containsKey(key))
       {
-         String msg = "already connected to server";
+         String msg = "already connected to server: " + key;
          throw new IllegalStateException(msg);
       }
       
@@ -72,7 +74,7 @@ public class ElvinEventSystem extends CebsEventSystem
       {
          // turn the host/port into a elvin url
          ElvinURL url = 
-            new ElvinURL("elvin:4.0/tcp,none/xdr/" + host + ":" + port);
+            new ElvinURL("elvin:4.0/tcp,none,xdr/" + host + ":" + port);
       
          Connection conn = new Connection(url);
          
@@ -81,8 +83,8 @@ public class ElvinEventSystem extends CebsEventSystem
       }
       catch (Exception e)
       {
-         String msg = "could not connect to server: " + host + ":" + port;
-         throw new CEBSException(msg, e);
+         String msg = "could not connect to server: " + key;
+         throw new CebsException(msg, e);
       }
    }
        
@@ -138,14 +140,14 @@ public class ElvinEventSystem extends CebsEventSystem
     *         if any parameter is <code>null</code>
     * @throws IllegalStateException 
     *         if no connection to the server exists
-    * @throws CEBSException
+    * @throws CebsException
     *         if the exception could not be sent
     * @throws ClassCastException
     *         if the event is not an Elvin event
     **/
    protected void sendEvent(String host, int port, String topic, 
                             Event event) 
-      throws CEBSException
+      throws CebsException
    {
       // check for null
       if ((host == null) || (topic == null) || (event == null))
@@ -165,7 +167,7 @@ public class ElvinEventSystem extends CebsEventSystem
       
       try
       {
-         // see if a producer already exists for this one
+         // see if a producer already exists for this connection
          if (producerMap.containsKey(connKey))
          {
             // retrieve the producer and send the event

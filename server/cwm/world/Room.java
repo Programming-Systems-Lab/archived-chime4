@@ -1,6 +1,6 @@
 package psl.chime4.server.cwm.world;
 
-import psl.chime4.server.data.ResourceDescriptor;
+import psl.chime4.server.cwm.Metadata;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ public class Room extends WorldObject
    /** list of objects in the room **/
    private List contents = new ArrayList();
    
-   /** the resource descriptor behind this room **/
-   private ResourceDescriptor resDesc;
+   /** the metadata behind this room **/
+   private Metadata mdata;
    
    /**
     * Remove an object from the room. If the object is not in this room
@@ -103,18 +103,18 @@ public class Room extends WorldObject
     *
     * @return underling metadata this room represents or <code>null</code>
     **/
-   public ResourceDescriptor getMetadata()
+   public Metadata getMetadata()
    {
-      return resDesc;
+      return mdata;
    }
    
    /**
     * Set the underlying metadata object this room represents.
     *
-    * @param resDesc underlying metadata this room represents
+    * @param mdata underlying metadata this room represents
     **/
-   public void setMetadata(ResourceDescriptor resDesc)
+   public void setMetadata(Metadata mdata)
    {
-      this.resDesc = resDesc;
+      this.mdata = mdata;
    }
 }

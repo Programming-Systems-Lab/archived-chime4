@@ -1,6 +1,6 @@
 package psl.chime4.server.cwm.world;
 
-import psl.chime4.server.data.ResourceDescriptor;
+import psl.chime4.server.cwm.Metadata;
 
 /**
  * Represents a piece of Metadata like a gif image or an mp3 file which 
@@ -12,26 +12,26 @@ import psl.chime4.server.data.ResourceDescriptor;
 public class MetadataWorldObject extends WorldObject
 {
    /** piece of metadata this object represents **/
-   private ResourceDescriptor resDesc;
+   private Metadata mdata;
 
    /**
     * Get the piece of metadata this object represents.
     *
     * @return underlying Metadata object
     **/
-   public ResourceDescriptor getMetadata()
+   public Metadata getMetadata()
    {
-      return resDesc;
+      return mdata;
    }
    
    /**
     * Set the underlying metadata object that this object represents in the
     * world.
     *
-    * @param resDesc metadata about some resource
+    * @param mdata metadata about some resource
     **/
-   public void setMetadata(ResourceDescriptor resDesc)
+   public void setMetadata(Metadata mdata)
    {
-      this.resDesc = resDesc;
+      this.mdata = mdata;
    }
 }

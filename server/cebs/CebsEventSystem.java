@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * This class defines an interface to an underlying publish/subscribe event
- * system.
+ * This class defines a generic interface to an underlying publish/subscribe 
+ * event system.
  *
  * @author Azubuko Obele
  * @version 0.1
@@ -21,6 +21,20 @@ public abstract class CebsEventSystem
    /** queue for incoming events **/
    private BlockingEventQueue eventQueue = new BlockingEventQueue();
    
+   /** true iff the event system has been started **/
+   private boolean systemStarted = false;
+   
+   /** EventDispatcherThread required for dispatching incoming events **/
+   private EventDispatcherThread eventDispatcherThread;
+   
+   /**
+    * Construct the default event system.
+    **/
+   protected CebsEventSystem()
+   {
+      eventDispatcherThread = new EventDispatcherThread(eventQueue, this);
+   }
+   
    /**
     * Startup the event system. No methods should be called before this
     * method--if they are an <code>IllegalStateException</code> may be
@@ -29,6 +43,7 @@ public abstract class CebsEventSystem
    public void startup()
    {
       // start the event dispatcher thread
+      eventDispatcherThread.startup();
    }
    
    /**
@@ -37,6 +52,7 @@ public abstract class CebsEventSystem
    public void shutdown()
    {
       // shutdown the event dispatcher thread
+      eventDispatcherThread.shutdown();
    }
    
    /**
@@ -48,16 +64,25 @@ public abstract class CebsEventSystem
     * @param port the port of the event server
     * @throws IllegalArgumentException
     *         if <code>host</code> is <code>null</code>
-    * @throws CEBSException
+    * @throws IllegalStateException
+    *         if the event system has not been started 
+    * @throws CebsException
     *         if the connection could not be opened
     **/
-   public void openConnection(String host, int port) throws CEBSException
+   public void openConnection(String host, int port) throws CebsException
    {
       // check for null
       if (host == null)
       {
          String msg = "host cannot be null";
          throw new IllegalArgumentException(msg);
+      }
+      
+      // make sure the system was started correctly
+      if (!systemStarted)
+      {
+         String msg = "must start event system before opening connections";
+         throw new IllegalStateException(msg);
       }
       
       // create the key for the connection
@@ -82,13 +107,13 @@ public abstract class CebsEventSystem
     *
     * @param host host of the event server process to connect to
     * @param port port of the event server process to connect to
-    * @throws CEBSException
+    * @throws CebsException
     *         if the connection cannot be made
     * @throws IllegalStateException
     *         if a connection to the server already exists
     **/
    protected abstract void openRealConnection(String host, int port) 
-      throws CEBSException;
+      throws CebsException;
    
    /**
     * Close a connection to a server. This method should be called after the
@@ -100,7 +125,8 @@ public abstract class CebsEventSystem
     * @throws IllegalArgumentException
     *         if <code>host</code> is <code>null</code>
     * @throws IllegalStateException
-    *         if no connection to the server exists
+    *         if no connection to the server exists or the system has not
+    *         been started
     **/
    public void closeConnection(String host, int port)
    {
@@ -111,12 +137,19 @@ public abstract class CebsEventSystem
          throw new IllegalArgumentException(msg);
       }
       
+      // make sure the system was started
+      if (!systemStarted)
+      {
+         String msg = "must start event system first";
+         throw new IllegalStateException(msg);
+      }
+      
       // make sure a connection exists
       String key = host + ":" + port;
       if (connectionCounter.getCount(key) <= 0)
       {
          String msg = "no connection to server exists";
-         throw new IllegalStateException();
+         throw new IllegalStateException(msg);
       }
       
       // decrement the connection count
@@ -148,18 +181,26 @@ public abstract class CebsEventSystem
     * @throws IllegalArgumentException
     *         if any parameter is <code>null</code>
     * @throws IllegalStateException
-    *         if no connection to the server exists
-    * @throws CEBSException
+    *         if no connection to the server exists or if the event system
+    *         has not been started
+    * @throws CebsException
     *         if the event cannot be published
     **/
    public void publish(String host, int port, String topic, Event event)
-      throws CEBSException
+      throws CebsException
    {
       // check for null
       if ((host == null) || (topic == null) || (event == null))
       {
          String msg = "no param can be null";
          throw new IllegalArgumentException(msg);
+      }
+      
+      // make sure the system's been started
+      if (!systemStarted)
+      {
+         String msg = "must start event system first";
+         throw new IllegalStateException(msg);
       }
       
       // make sure the connection exists
@@ -169,6 +210,11 @@ public abstract class CebsEventSystem
          String msg = "must open connection before sending events";
          throw new IllegalStateException(msg);
       }
+      
+      // add routing information to the event
+      event.put("xxx.event.topic", topic);
+      event.put("xxx.event.source.server.host", host);
+      event.put("xxx.event.source.server.port", port);
       
       sendEvent(host, port, topic, event);
    }
@@ -181,17 +227,16 @@ public abstract class CebsEventSystem
     * @param port  port of the event server process
     * @param topic topic to publish the event under
     * @param event event to actually send
-    * @throws CEBSException
+    * @throws CebsException
     *         if the event cannot be sent
     **/
    protected abstract void sendEvent(String host, int port, String topic, 
-                                     Event event) throws CEBSException;
+                                     Event event) throws CebsException;
    
    
    /**
     * Register an event handler to recieve events published under a given
-    * topic. Before calling this method, clients must call the
-    * {@link openConnection} method.
+    * topic from a given server. 
     *
     * @param host    host that is managing the topic
     * @param port    port of the event server process
@@ -200,19 +245,27 @@ public abstract class CebsEventSystem
     * @throws IllegalArgumentException
     *         if any parameter is <code>null</code>
     * @throws IllegalStateException
-    *         if no connection was made to server
-    * @throws CEBSException
+    *         if no connection was made to server or if the server has not
+    *         been started
+    * @throws CebsException
     *         if the subscription could not be made
     **/
    public void registerEventHandler(String host, int port, String topic, 
                                     EventHandler handler) 
-      throws CEBSException
+      throws CebsException
    {
       // check for null
       if ((host == null) || (topic == null) || (handler == null))
       {
          String msg = "no parameter can be null";
          throw new IllegalArgumentException(msg);
+      }
+      
+      // make sure the system's been started
+      if (!systemStarted)
+      {
+         String msg = "must first start server";
+         throw new IllegalStateException(msg);
       }
       
       // make sure a connection has been opened
@@ -237,12 +290,12 @@ public abstract class CebsEventSystem
     * @param host  the event server
     * @param port  port of the event server
     * @param topic topic to subscribe too
-    * @throws CEBSException
+    * @throws CebsException
     *         if the subscription cannot be made
     **/
    protected abstract void addSubscription(String host, int port, 
                                            String topic) 
-      throws CEBSException;
+      throws CebsException;
    
    /**
     * Unregister an event handler that no longer wants to subscribe to a 
@@ -253,17 +306,27 @@ public abstract class CebsEventSystem
     * @param topic the topic to unsubscribe from
     * @throws IllegalArgumentException
     *         if any parameter is <code>null</code>
-    * @throws CEBSException
+    * @throws IllegalStateException
+    *         if no connection to the server exists or if the event system
+    *         has not been started
+    * @throws CebsException
     *         if the subscription to the event server cannot be undone
     **/
    public void unregisterEventHandler(String host, int port, String topic)
-      throws CEBSException
+      throws CebsException
    {
       // check for null
       if ((host == null) || (topic == null))
       {
          String msg = "no param may be null";
          throw new IllegalArgumentException(msg);
+      }
+      
+      // make sure that the event system was started
+      if (!systemStarted)
+      {
+         String msg = "must start event system first";
+         throw new IllegalStateException(msg);
       }
       
       // make sure a connection has been opened
@@ -288,12 +351,12 @@ public abstract class CebsEventSystem
     * @param host  the host of the event server
     * @param port  the port of the event server process
     * @param topic the topic to unsubscribe from
-    * @throws CEBSException
+    * @throws CebsException
     *         if the subscription cannot be removed
     **/
    protected abstract void removeSubscription(String host, int port, 
                                               String topic) 
-      throws CEBSException;
+      throws CebsException;
    
    /**
     * Get an EventHandler subscribed to a topic on a given host.
@@ -336,11 +399,10 @@ public abstract class CebsEventSystem
    }
    
    /**
-    * Create an empty event. No guarantee is made on the uniqueness of this
-    * Event object. This is because for performance reasons the underlying
-    * event system implementation may wish to do object pooling. Clients 
-    * must not depend on the uniqueness of Event objects since they may 
-    * unknowingly be reusing the same object.
+    * Create an empty event. No guarantee is made on the uniqueness of the 
+    * returned event object. For performance reasons, the underlying event
+    * system implementation may wish to pool Event objects therefore clients
+    * may be unknowingly reusing the same event.
     *
     * @return an empty Event object
     **/

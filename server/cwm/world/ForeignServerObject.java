@@ -34,7 +34,7 @@ public class ForeignServerObject extends Room
     *
     * @param eventServer the address of the event server of the Zone Server
     **/
-   public void setEventServerAddress(int eventServer)
+   public void setEventServerAddress(String eventServer)
    {
       this.eventServerAddress = eventServer;
    }

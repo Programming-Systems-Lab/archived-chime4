@@ -18,6 +18,9 @@ public class RoomView extends WorldObjectView
    /** the height of the room **/
    private int height;
    
+   /** the length of the room **/
+   private int length;
+   
    /** List of views of doors in the room **/
    private List doorViews = new ArrayList();
    
@@ -64,6 +67,26 @@ public class RoomView extends WorldObjectView
       this.height = height;
    }
    
+   /**
+    * Get the length of the room.
+    *
+    * @return the length of the room
+    **/
+   public int getLength()
+   {
+      return length;
+   }
+   
+   /**
+    * Set the length of the room.
+    *
+    * @param length the length of the room
+    **/
+   public void setLength(int length)
+   {
+      this.length = length;
+   }
+  
    /**
     * Add a view of a Door object that leads <em>from</em this room to
     * another room.

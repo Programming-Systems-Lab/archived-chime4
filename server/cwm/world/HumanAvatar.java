@@ -1,5 +1,7 @@
 package psl.chime4.server.cwm.world;
 
+import psl.chime4.server.cwm.User;
+
 /**
  * Represents a human avatar in the world. This is an actual client in the 
  * CHIME system.
@@ -9,26 +11,26 @@ package psl.chime4.server.cwm.world;
  **/
 public class HumanAvatar extends WorldObject
 {
-   /** the uid of the client in CHIME **/
-   private int uid;
+   /** the User object representing of the client in CHIME **/
+   private User user;
    
    /**
-    * Get the user-ID of the client in CHIME.
+    * Get the User object for the client in CHIME.
     *
-    * @return user-ID of the client
+    * @return User that represents this client
     **/
-   public int getUID()
+   public User getUser()
    {
-      return uid;
+      return user;
    }
    
    /**
-    * Set the user-id of the client in CHIME.
+    * Set the User of this client in CHIME.
     *
-    * @param uid the user-ID of the client.
+    * @param user the User object for the client.
     **/
-   public void setUID(int uid)
+   public void set(User user)
    {
-      this.uid = uid;
+      this.user = user;
    }
 }

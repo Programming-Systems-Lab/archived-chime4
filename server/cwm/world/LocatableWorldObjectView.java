@@ -24,6 +24,9 @@ public abstract class LocatableWorldObjectView extends WorldObjectView
    /** the height of the object in the world **/
    private int height = -1;
    
+   /** the length of the object in the world **/
+   private int length = -1;
+   
    /**
     * Get the x-coordinate of the object in the world.
     *
@@ -122,5 +125,25 @@ public abstract class LocatableWorldObjectView extends WorldObjectView
    public void setHeight(int height)
    {
       this.height = height;
+   }
+   
+   /**
+    * Get the length of the room.
+    *
+    *@return length of the room
+    **/
+   public int getLength()
+   {
+      return length;
+   }
+   
+   /**
+    * Set the length of the room.
+    *
+    * @param length the length of the room
+    **/
+   public void setLength(int length)
+   {
+      this.length = length;
    }
 }
