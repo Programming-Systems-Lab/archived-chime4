@@ -1,5 +1,15 @@
 #include "EnvironmentModeler.h"
+#include "client94/core.h"
 
+//static variables
+EMModel *EnvironmentModeler::modelHash[EM_MODEL_HASH_SIZE];
+EMRoom *EnvironmentModeler::roomHash[EM_ROOM_HASH_SIZE];
+EMDoor *EnvironmentModeler::doorHash[EM_DOOR_HASH_SIZE];
+EMObject *EnvironmentModeler::objectHash[EM_OBJECT_HASH_SIZE];
+EMAvatar *EnvironmentModeler::avatarHash[EM_AVATAR_HASH_SIZE];
+Coords EnvironmentModeler::cameraLocation;
+Coords EnvironmentModeler::cameraFocus;
+EMRoom *EnvironmentModeler::cameraRoom;
 
 void EnvironmentModeler::initialize( void )
 {
@@ -9,13 +19,6 @@ void EnvironmentModeler::initialize( void )
 	EMEntity::initHash( (EMEntity **) &doorHash, EM_DOOR_HASH_SIZE );
 	EMEntity::initHash( (EMEntity **) &objectHash, EM_OBJECT_HASH_SIZE );
 	EMEntity::initHash( (EMEntity **) &avatarHash, EM_AVATAR_HASH_SIZE );
-
-	//init view
-	cameraLocation = Coords( 0, 0, 0 );
-	cameraFocus = Coords( 0, 0, 0 );
-	cameraRoom = NULL;
-
-	//init the engine
 }
 
 void EnvironmentModeler::shutdown( void )
@@ -26,8 +29,6 @@ void EnvironmentModeler::shutdown( void )
 	EMEntity::clearHash( (EMEntity **) &doorHash, EM_DOOR_HASH_SIZE );
 	EMEntity::clearHash( (EMEntity **) &objectHash, EM_OBJECT_HASH_SIZE );
 	EMEntity::clearHash( (EMEntity **) &avatarHash, EM_AVATAR_HASH_SIZE );
-
-	//shutdown the engine
 }
 
 void EnvironmentModeler::placeRoom( ChimeID setID, Coords setDim, ChimeID setModel )
@@ -39,17 +40,21 @@ void EnvironmentModeler::placeRoom( ChimeID setID, Coords setDim, ChimeID setMod
 
 	//just add it into the hash
 	EMEntity::addHashEntity( (EMEntity **) &roomHash, EM_ROOM_HASH_SIZE, tempRoom );
+
+	//inform the engine
+	ClientEngine::addRoom( tempRoom );
 }
 
 void EnvironmentModeler::placeDoor( ChimeID setID, ChimeID roomOne, ChimeID roomTwo,
-	Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel )
+	Coords setDim, Coords coordsOne, Coords coordsTwo, 
+	Coords rotOne, Coords rotTwo, ChimeID setModel )
 {
 	EMRoom *theRoom;
 	EMDoor *tempDoor;
 
 	//make the door
 	tempDoor = new EMDoor( setID, roomOne, roomTwo, setDim,
-							coordsOne, coordsTwo, setModel );
+							coordsOne, coordsTwo, rotOne, rotTwo, setModel );
 
 	//add it to the two rooms
 	theRoom = (EMRoom *) EMEntity::getHashEntity( (EMEntity **) &roomHash, EM_ROOM_HASH_SIZE, roomOne );
@@ -59,41 +64,50 @@ void EnvironmentModeler::placeDoor( ChimeID setID, ChimeID roomOne, ChimeID room
 	theRoom->addDoor( tempDoor );
 
 	//add it to the hash
-	EMEntity::addHashEntity( (EMEntity **) &doorHash, EM_DOOR_HASH_SIZE, tempDoor );  
+	EMEntity::addHashEntity( (EMEntity **) &doorHash, EM_DOOR_HASH_SIZE, tempDoor );
+
+	//inform the engine
+	ClientEngine::addDoor( tempDoor );
 }
 
 void EnvironmentModeler::placeObject( ChimeID setID, ChimeID setRoom, Coords setDim,
-	Coords setCoords, ChimeID setModel )
+	Coords setCoords, Coords setRotate, ChimeID setModel )
 {
 	EMRoom *theRoom;
 	EMObject *tempObject;
 
 	//make the new object
-	tempObject = new EMObject( setID, setRoom, setDim, setCoords, setModel );
+	tempObject = new EMObject( setID, setRoom, setDim, setCoords, setRotate, setModel );
 
 	//put it in the room
 	theRoom = (EMRoom *) EMEntity::getHashEntity( (EMEntity **) &roomHash, EM_ROOM_HASH_SIZE, setRoom );
 	theRoom->addObject( tempObject );
 
 	//add it to the hash
-	EMEntity::addHashEntity( (EMEntity **) &objectHash, EM_OBJECT_HASH_SIZE, tempObject ); 
+	EMEntity::addHashEntity( (EMEntity **) &objectHash, EM_OBJECT_HASH_SIZE, tempObject );
+
+	//inform the engine
+	ClientEngine::addObject( tempObject );
 }
 
 void EnvironmentModeler::placeAvatar( ChimeID setID, ChimeID setRoom, Coords setDim,
-	Coords setCoords, ChimeID setModel )
+	Coords setCoords, Coords setRotate, ChimeID setModel )
 {
 	EMRoom *theRoom;
 	EMAvatar *tempAvatar;
 
 	//make the new avatar
-	tempAvatar = new EMAvatar( setID, setRoom, setDim, setCoords, setModel );
+	tempAvatar = new EMAvatar( setID, setRoom, setDim, setCoords, setRotate, setModel );
 
 	//put it in the room
 	theRoom = (EMRoom *) EMEntity::getHashEntity( (EMEntity **) &roomHash, EM_ROOM_HASH_SIZE, setRoom );
 	theRoom->addAvatar( tempAvatar );
 
 	//add to the hash
-	EMEntity::addHashEntity( (EMEntity **) &avatarHash, EM_AVATAR_HASH_SIZE, tempAvatar ); 
+	EMEntity::addHashEntity( (EMEntity **) &avatarHash, EM_AVATAR_HASH_SIZE, tempAvatar );
+
+	//inform the engine
+	ClientEngine::addAvatar( tempAvatar );
 }
 
 void EnvironmentModeler::updateRoom( ChimeID roomID, Coords setDim, ChimeID setModel )
@@ -109,7 +123,8 @@ void EnvironmentModeler::updateRoom( ChimeID roomID, Coords setDim, ChimeID setM
 }
 
 void EnvironmentModeler::updateDoor( ChimeID doorID, ChimeID roomOne, ChimeID roomTwo,
-	Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel )
+	Coords setDim, Coords coordsOne, Coords coordsTwo, 
+	Coords rotOne, Coords rotTwo, ChimeID setModel )
 {
 	EMDoor *theDoor;
 	EMRoom **curRooms;
@@ -127,6 +142,7 @@ void EnvironmentModeler::updateDoor( ChimeID doorID, ChimeID roomOne, ChimeID ro
 	theDoor->setDimensions( setDim );
 	theDoor->setModel( setModel );
 	theDoor->setLinkCoords( coordsOne, coordsTwo );
+	theDoor->setLinkRotation( rotOne, rotTwo );
 
 	//add it to the two new rooms
 	curRooms[0] = (EMRoom *) EMEntity::getHashEntity( (EMEntity **) &roomHash, EM_ROOM_HASH_SIZE, roomOne );
@@ -140,7 +156,7 @@ void EnvironmentModeler::updateDoor( ChimeID doorID, ChimeID roomOne, ChimeID ro
 }
 
 void EnvironmentModeler::updateObject( ChimeID objectID, ChimeID setRoom, Coords setDim,
-	Coords setCoords, ChimeID setModel )
+	Coords setCoords, Coords setRotate, ChimeID setModel )
 {
 	EMObject *theObject;
 	EMRoom *theRoom;
@@ -155,11 +171,12 @@ void EnvironmentModeler::updateObject( ChimeID objectID, ChimeID setRoom, Coords
 	theObject->setRoom( theRoom );
 	theObject->setDimensions( setDim );
 	theObject->setRoomCoords( setCoords );
+	theObject->setRotation( setRotate );
 	theObject->setModel( setModel );
 }
 
 void EnvironmentModeler::updateAvatar( ChimeID avatarID, ChimeID setRoom, Coords setDim,
-	Coords setCoords, ChimeID setModel )
+	Coords setCoords, Coords setRotate, ChimeID setModel )
 {
 	EMAvatar *theAvatar;
 	EMRoom *theRoom;
@@ -174,6 +191,7 @@ void EnvironmentModeler::updateAvatar( ChimeID avatarID, ChimeID setRoom, Coords
 	theAvatar->setRoom( theRoom );
 	theAvatar->setDimensions( setDim );
 	theAvatar->setRoomCoords( setCoords );
+	theAvatar->setRotation( setRotate );
 	theAvatar->setModel( setModel );
 }
 
@@ -265,11 +283,22 @@ EMObject *EnvironmentModeler::getObject( ChimeID objectID )
 
 EMModel *EnvironmentModeler::getModel( ChimeID modelID )
 {
+	EMModel *temp;
+
 	//pull it from the hash
-	return (EMModel *) EMEntity::getHashEntity( (EMEntity **) &modelHash, EM_MODEL_HASH_SIZE, modelID );
+	temp = (EMModel *) EMEntity::getHashEntity( (EMEntity **) &modelHash, EM_MODEL_HASH_SIZE, modelID );
+
+	//if it's not there, create it
+	if( temp == NULL )
+	{
+		temp = new EMModel( NULL, modelID );
+		EMEntity::addHashEntity( (EMEntity **) &modelHash, EM_MODEL_HASH_SIZE, temp );
+	}
+
+	return temp;
 }
 
-void EnvironmentModeler::moveAvatar( ChimeID avatarID, Coords setCoords )
+void EnvironmentModeler::moveAvatar( ChimeID avatarID, Coords setCoords, Coords setRotation )
 {
 	EMAvatar *theAvatar;
 
@@ -291,9 +320,16 @@ void EnvironmentModeler::updateModel( ChimeID modelID, char *file )
 
 	//update it, inform the engine of sucessful update
 	if( !theModel->updateModel( file ) )
+		EnvironmentModeler::requestModel( modelID );
+	else
 	{
-		//inform the engine
+		//tell the engine that it's now been loaded
 	}
+}
+
+void EnvironmentModeler::requestModel( ChimeID modelID )
+{
+
 }
 
 void EnvironmentModeler::flush( void )
@@ -311,12 +347,34 @@ void EnvironmentModeler::flush( void )
 	cameraRoom = NULL;
 
 	//flush the engine
+	ClientEngine::flush();
 }
 
-void EnvironmentModeler::setCamera( ChimeID roomID, Coords location, Coords focus )
+void EnvironmentModeler::setCamera( ChimeID room, Coords location )
 {
-	//set camera paramters
-	cameraLocation = location;
-	cameraFocus = focus;
-	cameraRoom = getRoom( roomID );
+	EMRoom *tempRoom;
+
+	tempRoom = (EMRoom *) EMEntity::getHashEntity( (EMEntity **) &roomHash, EM_ROOM_HASH_SIZE, room );
+	if( tempRoom != NULL )
+		ClientEngine::moveToRoom( tempRoom, location.x, location.y, location.z );
+}
+
+void EnvironmentModeler::offsetCamera( Coords offset )
+{
+	ClientEngine::offsetCamera( offset.x, offset.y, offset.z );
+}
+
+void EnvironmentModeler::setCameraRotate( Coords amount )
+{
+	ClientEngine::setCameraRotate( amount.x, amount.y, amount.z );
+}
+
+void EnvironmentModeler::offsetCameraRotate( Coords offset )
+{
+	ClientEngine::offsetCameraRotate( offset.x, offset.y, offset.z );
+}
+
+void EnvironmentModeler::setCameraFocus( Coords focus )
+{
+	ClientEngine::setCameraFocus( focus.x, focus.y, focus.z );
 }

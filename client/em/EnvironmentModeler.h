@@ -20,6 +20,8 @@ class EMRoom;
 #define EM_DOOR_HASH_SIZE 64
 #define EM_OBJECT_HASH_SIZE 64
 
+#define EM_MODEL_DATA_DIR "./data/models/"
+
 
 //environment modeler definition
 class EnvironmentModeler
@@ -30,19 +32,21 @@ class EnvironmentModeler
 
 		static void placeRoom( ChimeID setID, Coords setDim, ChimeID setModel );
 		static void placeDoor( ChimeID setID, ChimeID roomOne, ChimeID roomTwo,
-			Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel );
+			Coords setDim, Coords coordsOne, Coords coordsTwo,
+			Coords rotOne, Coords rotTwo, ChimeID setModel );
 		static void placeObject( ChimeID setID, ChimeID setRoom, Coords setDim,
-			Coords setCoords, ChimeID setModel );
+			Coords setCoords, Coords setRotate, ChimeID setModel );
 		static void placeAvatar( ChimeID setID, ChimeID setRoom, Coords setDim,
-			Coords setCoords, ChimeID setModel );
+			Coords setCoords, Coords setRotate, ChimeID setModel );
 
 		static void updateRoom( ChimeID roomID, Coords setDim, ChimeID setModel );
 		static void updateDoor( ChimeID doorID, ChimeID roomOne, ChimeID roomTwo,
-			Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel );
+			Coords setDim, Coords coordsOne, Coords coordsTwo,
+			Coords rotOne, Coords rotTwo, ChimeID setModel );
 		static void updateObject( ChimeID objectID, ChimeID setRoom, Coords setDim,
-			Coords setCoords, ChimeID setModel );
+			Coords setCoords, Coords setRotate, ChimeID setModel );
 		static void updateAvatar( ChimeID avatarID, ChimeID setRoom, Coords setDim,
-			Coords setCoords, ChimeID setModel );
+			Coords setCoords, Coords setRotate, ChimeID setModel );
 
 		static void removeRoom( ChimeID elementID );
 		static void removeDoor( ChimeID elementID );
@@ -55,12 +59,18 @@ class EnvironmentModeler
 		static EMObject *getObject( ChimeID objectID );
 		static EMModel *getModel( ChimeID modelID );
 
-		static void moveAvatar( ChimeID avatarID, Coords setCoords );
+		static void moveAvatar( ChimeID avatarID, Coords setCoords, Coords setRotation );
 
 		static void updateModel( ChimeID modelID, char *file );
+		static void requestModel( ChimeID modelID );
 
 		static void flush( void );
-		static void setCamera( ChimeID roomID, Coords location, Coords focus );
+
+		static void setCamera( ChimeID room, Coords location );
+		static void offsetCamera( Coords offset );
+		static void setCameraRotate( Coords amount );
+		static void offsetCameraRotate( Coords offset );
+		static void setCameraFocus( Coords focus );
 
 	private:
 

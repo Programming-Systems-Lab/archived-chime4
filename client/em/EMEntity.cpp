@@ -7,6 +7,11 @@ EMEntity::EMEntity( ChimeID setID )
 	hashNext = NULL;
 }
 
+EMEntity::~EMEntity( void )
+{
+
+}
+
 EMEntity::EMEntity( void )
 {
 	//no

@@ -8,15 +8,9 @@ class EMModel: public EMEntity
 {
 	public:
 		EMModel( char *file, ChimeID setID );
-		~EMModel( void );
+		virtual ~EMModel( void );
 
-		int updateModel( char *file );
-
-		void *getModelData( int *length );
-
-	protected:
-		void *modelData;
-		unsigned int modelDataLength;
+		bool updateModel( char *file );
 };
 
 #endif

@@ -13,8 +13,7 @@ EMElement::EMElement( void )
 
 EMElement::~EMElement( void )
 {
-	if( model != NULL )
-		delete model;
+
 }
 
 void EMElement::setModel( ChimeID setModelID )
