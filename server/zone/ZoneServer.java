@@ -88,6 +88,14 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 	serverThread = null;
 	runThread = true;
 
+	metrics = new NetworkMetrics();
+
+	// When we first start up we do NOT perform any zone services.  We
+	// enable service ONLY if 
+	//     a) requested to by another known zone server
+	//     b) we can not find any other zone servers on the network
+	metrics.disableZoneService();
+
 	zoneLayout = new ZoneSettings();
 	dataManager = new DataManager();
 	zoneManager = new ZoneManager(zoneLayout, dataManager);
@@ -96,8 +104,7 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 	zoneControl = new DefaultZoneAuthority(zoneManager, di);
 	backupControl = new DefaultBackupAuthority(zoneManager,dataManager,di);
-	metrics = null;
-	networkControl = new DefaultNetworkAuthority(metrics);
+	networkControl = new DefaultNetworkAuthority(metrics, zoneLayout);
 
     }
 
@@ -133,6 +140,7 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
      **/
     public void stopZoneServer() {
 	runThread = false;
+	metrics.disableZoneService();
     }
 
 
@@ -147,10 +155,19 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
      * servers, accepting extra zone responsibility, or offsetting current
      * zone responsibility.  This is the zone server's "main method" for
      * network balancing, and runs in its own thread.
+     *
+     * If we're providing zone services (i.e. the zone server is "enabled"),
+     * we also send an "alive" update periodically to announce our presence
+     * to the network
      **/
     private void runMainThread() {
 	while (runThread) {
-	    networkControl.monitorNetwork();
+
+	    if (metrics.zoneServiceEnabled()) {
+		networkControl.monitorNetwork();
+		PeerCommunicator.sendBroadcast(SEND_ALIVE_UPDATE);
+	    }
+
 	    try {new Thread().sleep(1000);} catch (Exception e) {}
 	}
     }
@@ -161,14 +178,36 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
     public void receiveMessage(DIMessage msg) {
 
-	String msgBody = msg.getBody().getData();
+	String msgBody = msg.getBody().toString();
 	Hashtable data = StringParser.parseKeyValueString(msgBody);
 	NetworkNode source = new NetworkNode(msg.getSender().toString(), null);
 
-	
+
+	/**
+	 *  Locally handled stuff
+	 **/
 	if (msg.getType().equals(STOP_ZONE_SERVICE)) 
 	    stopZoneServer();
+	else if (msg.getType().equals(SEND_ALIVE_UPDATE))
+	    metrics.getServerList().setLiveServer(msg.getSender().toString());
 
+
+	/**
+	 * Handled by the network control authority
+	 **/
+	else if (msg.getType().equals(REQUEST_ZONE_SERVER_CANDIDATE)) 
+	    ; // MUST HAVE SOME WAY TO SELECT FROM LIST OF CHIME SERVERS
+	// UNDER OUR DOMAIN AND RETURN ONE OF THOSE CHIME SERVERS TO THE
+	// REQUESTING ZS
+	else if (msg.getType().equals(OFFER_ZONE_SERVICE)) {
+	    NetworkNode cs = (NetworkNode) retrieveObject(data, CHIME_SERVER);
+	    networkControl.handleZoneServiceOffer(cs);
+	}
+
+
+	/**
+         *  Handled by zone control authority
+         **/
 	else if (msg.getType().equals(TRANSFER_ZONE)) { 
 	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
 	    NetworkNode pn=(NetworkNode) retrieveObject(data, 
@@ -186,7 +225,10 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 	    zoneControl.handleZoneTransferAcceptance(list, source);
 	}
 	
-	
+
+	/**
+         *  Handled by backup control authority
+	 **/
 	else if (msg.getType().equals(REQUEST_PRIMARY_BACKUP)) {
 	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
 	    backupControl.handlePrimaryBackupRequest(list, source);
@@ -219,6 +261,7 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
 
+    /** Nothing needs to be done here --> interface requirement **/
     public void receiveEvent(DIEvent event) {
     }
 
@@ -226,22 +269,8 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
 
+    /** Nothing needs to be done here --> interface requirement **/
     public void receiveResult(DIHost result) {
-    }
-
-
-
-
-
-    /**
-     * Searches across the network for current CHIME servers that are
-     * eligible to become zone servers, selects one such server, 
-     * promotes it to a zone server, and assigns zone responsibility to
-     * the new server.  This method assumes that the need for such a server
-     * has already been identified elsewhere and that the local server has
-     * responsibility for fulfilling that need.
-     **/
-    private void addNewZoneServer() {
     }
 
 
@@ -256,13 +285,18 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
      * @param serialized - hash key for the desired object
      **/
     private static Object retrieveObject(Hashtable h, String serialized) {
-	serialized = (String) h.get(serialized);
-	ByteArrayInputStream stream;
-	stream = new ByteArrayInputStream(serialized.getBytes());
-	ObjectInputStream in = new ObjectInputStream(stream);
-	Object o = in.readObject();
-	in.close();
-	return o;
+	try {
+	    serialized = (String) h.get(serialized);
+	    ByteArrayInputStream stream;
+	    stream = new ByteArrayInputStream(serialized.getBytes());
+	    ObjectInputStream in = new ObjectInputStream(stream);
+	    Object o = in.readObject();
+	    in.close();
+	    return o;
+	}
+	catch (Exception e) {
+	    return null;
+	}
     }
 
 
@@ -270,3 +304,4 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
 } // end ZoneServer class
+

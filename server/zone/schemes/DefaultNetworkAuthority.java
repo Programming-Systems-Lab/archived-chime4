@@ -2,24 +2,129 @@
 package psl.chime4.server.zone.schemes;
 
 import psl.chime4.server.auth.NetworkNode;
+import psl.chime4.server.zone.*;
 import psl.chime4.server.zone.authority.NetworkAuthority;
-import psl.chime4.server.zone.metrics.NetworkMetrics;
+import psl.chime4.server.zone.metrics.*;
 
 
-public class DefaultNetworkAuthority implements NetworkAuthority {
-
+public class DefaultNetworkAuthority implements NetworkAuthority,
+                                                MessageDefinitions {
 
     private NetworkMetrics metrics;
+    private ZoneSettings zoneLayout;
+
+    private NetworkNode freeServer = null;
+
+    private int peerCheck = 0;
+    private boolean requestingBackup = false;
 
 
-    public DefaultNetworkAuthority(NetworkMetrics m) {
+    public DefaultNetworkAuthority(NetworkMetrics m, ZoneSettings zs) {
 	this.metrics = m;
+	this.zoneLayout = zs;
     }
+
+
 
 
 
     public void monitorNetwork() {
+
+	// Check if we are the only host on the network and should therefore
+	// promote ourselves to a zone server
+	if (metrics.zoneServiceEnabled() == false) {
+	    peerCheck++;	
+	    if ((metrics.getServerList().getLiveServerCount()==0) && 
+		(peerCheck >= 10))
+		startProactiveZoneService();
+	}
+
+
+	else {   // if we are currently providing zone services
+	    
+	    ensureBackupAvailable();
+	    
+	}
     }
+
+
+
+
+
+    /**
+     * Upgrade the local server to a zone server, assuming that there are
+     * no other zone servers on the network.
+     **/
+    private void startProactiveZoneService() {
+	Zone z1 = new Zone();
+	Zone z2 = new Zone();
+	Zone z3 = new Zone();
+
+	zoneLayout.addPrimaryZone(z1, true);
+	zoneLayout.addPrimaryZone(z2, true);
+	zoneLayout.addPrimaryZone(z3, true);
+
+	zoneLayout.setNextNeighbor(null);
+	zoneLayout.setPreviousNeighbor(null);
+
+	metrics.enableZoneService();
+    }
+
+
+
+
+
+    /**
+     * Check that this server is currently being covered by active (alive)
+     * primary and secondary backup servers.  If not, request as appropriate.
+     **/
+    private void ensureBackupAvailable() {
+	Zone[] primaryZones = zoneLayout.getPrimaryZones();
+
+	if (primaryZones.length == 0)   // not doing primary coverage
+	    return;
+
+	// We may assume that all zones under our control share the same
+	// backup servers.  So we need only look at the info for the first
+	// element in the list.
+	NetworkNode backup1 = primaryZones[0].getFirstBackupServer();
+	NetworkNode backup2 = primaryZones[0].getSecondBackupServer();
+      
+
+	// See if we need to request new backup services (only request one
+	// at a time)
+	ServerTracker sl = metrics.getServerList();
+	if ((backup1 == null) || 
+	    (sl.isServerAlive(backup1.getIPAddress()) == false)) {
+
+	    if (requestingBackup == false) {
+		NetworkNode backup = getFreeZoneServer();
+		if (backup != null) {
+		    PeerCommunicator.requestPrimaryBackup(primaryZones,backup);
+		    requestingBackup = true;
+		}
+	    }
+	}
+	    
+
+	else if ((backup2 == null) ||
+		 (sl.isServerAlive(backup2.getIPAddress()) == false)) {
+
+	    if (requestingBackup == false) {
+		NetworkNode backup = getFreeZoneServer();
+		if (backup != null) {
+		    PeerCommunicator.requestSecondaryBackup(primaryZones, 
+							    backup);
+		    requestingBackup = true;
+		}
+	    }
+	}
+       
+	else {
+	    requestingBackup = false;
+	}
+    }
+
 
 
 
@@ -71,8 +176,48 @@ public class DefaultNetworkAuthority implements NetworkAuthority {
 
 
 
+
+    /**
+     * Returns a link to a zone server which is currently unoccupied (not
+     * performing any zone duties).  If no such server exists, then this
+     * method sends out a request to the network for a new server to
+     * be instantiated (from a CHIME server) and returns null.  It will
+     * return null until that server has been upgraded and is ready to go.
+     **/
+    private NetworkNode getFreeZoneServer() {
+
+	if (freeServer != null) {
+	    NetworkNode ret = freeServer;
+	    freeServer = null;  // we assume that the method's caller will
+	                        // utilize the server and make it no longer
+	                        // free
+	    return ret;
+
+	}
+	else {
+	    PeerCommunicator.sendBroadcast(REQUEST_ZONE_SERVER_CANDIDATE);
+	    return null;
+	}
+    }
+
+
+
+
+
+    /**
+     * If we're looking for a free zone server, then upgrade this chime
+     * server.  Otherwise, ignore the zone service offer, since we already
+     * have someone else we can use.
+     **/
+    public void handleZoneServiceOffer(NetworkNode chimeServer) {
+	if (freeServer == null) {
+	    PeerCommunicator.sendMessage(START_ZONE_SERVICE, chimeServer);
+	    freeServer = chimeServer;
+	}
+    }
+
+
+
+
 } // end DefaultNetworkAuthority class
-
-
-
 

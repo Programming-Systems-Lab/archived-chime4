@@ -23,6 +23,15 @@ public class PeerCommunicator implements MessageDefinitions {
 
 
 
+    public static void sendBroadcast(String message) {
+	DirectoryInterface.publish(new DIType(message),
+				   new DIMessageBody(message));
+    }
+
+
+
+
+
     public static void initiateZoneTransfer
 	(Zone[] list, NetworkNode zoneServer, NetworkNode newPrevNeighbor,
 	 NetworkNode newNextNeighbor) {

@@ -16,12 +16,14 @@ public interface MessageDefinitions {
     public static String OFFER_SECONDARY_BACKUP   = "offer_secondary_backup";
     public static String REJECT_ZONE_BACKUP       = "reject_zone_backup";
     public static String ACCEPT_ZONE_BACKUP       = "accept_zone_backup";
-
-
+    public static String SEND_ALIVE_UPDATE        = "send_alive_update";
+    public static String REQUEST_ZONE_SERVER_CANDIDATE = "rzsc";
+    public static String OFFER_ZONE_SERVICE       = "offer_zone_service";
 
     // Message body key definitions
     public static String ZONE_LIST                = "zonelist";
     public static String SET_PREVIOUS_NEIGHBOR    = "setprevneighbor";
     public static String SET_NEXT_NEIGHBOR        = "setnextneighbor";
+    public static String CHIME_SERVER             = "chimeserver";
 
 } // end MessageDefinitions Stringerface

@@ -13,11 +13,6 @@ import java.util.Hashtable;
  * are useful for determining when network reorganization may be appropriate
  * due to excessively high or low usage, mis-configuration, etc.
  *
- * This class maintains no knowledge about what its data means.  It is up
- * to other classes to manipulate and interpret data correctly, as well as
- * to know what types of data are actually available.  Note that all
- * metric data is numeric.
- *
  * @author Gregory Estren (gce3@columbia.edu)
  * @version 1.0
  **/
@@ -25,7 +20,10 @@ import java.util.Hashtable;
 public class NetworkMetrics {
 
     private Hashtable t;
+    private ServerTracker serverList;
 
+    private boolean zoneServiceEnabled = false;
+   
 
     /**
      * Instantiate a new NetworkMetrics object with no metrics initially
@@ -33,8 +31,25 @@ public class NetworkMetrics {
      **/
     public NetworkMetrics() {
 	t = new Hashtable();
+	serverList = new ServerTracker();
     }
 
+
+    public boolean zoneServiceEnabled() {
+	return zoneServiceEnabled;
+    }
+
+    public void disableZoneService() {
+	zoneServiceEnabled = false;
+    }
+
+    public void enableZoneService() {
+	zoneServiceEnabled = true;
+    }
+
+    public ServerTracker getServerList() {
+	return serverList;
+    }
 
 
     /**
@@ -64,13 +79,13 @@ public class NetworkMetrics {
      * Retrieve the specified metric.
      *
      * @param name - metric variable name
-     * @return numeric value for that metric, or 0 if no metric by the 
+     * @return numeric value for that metric, or -1 if no metric by the 
      *         specified name exists
      **/
     public int getMetric(String name) {
 	Integer i = (Integer) t.get(name);
 	if (i == null)
-	    return 0;
+	    return -1;
 	else
 	    return i.intValue();
     }
@@ -78,13 +93,6 @@ public class NetworkMetrics {
 
 
 } // end NetworkMetrics class
-
-
-
-
-
-
-
 
 
 

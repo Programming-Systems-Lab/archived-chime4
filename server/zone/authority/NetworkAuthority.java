@@ -51,9 +51,14 @@ public interface NetworkAuthority {
     public void handleDroppedChimeServer(NetworkNode chimeServer);
 
 
-
+    /**
+     * Given a CHIME server that is offering (available) to provide zone
+     * services, react appropriately.
+     **/
+    public void handleZoneServiceOffer(NetworkNode chimeServer);
 
 } // end NetworkAuthority interface
+
 
 
 
