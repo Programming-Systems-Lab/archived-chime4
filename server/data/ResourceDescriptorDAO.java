@@ -7,6 +7,9 @@
 
 package psl.chime4.server.data;
 
+import psl.chime4.server.librarian.LibrarianRequest;
+import psl.chime4.server.librarian.LibrarianResult;
+
 /**
  * Manages the persistence of <code>ResourceDescriptor</code> objects.
  * Concrete implementations of this interface will communicate with some kind
@@ -25,4 +28,11 @@ package psl.chime4.server.data;
  * @see ResourceDescriptorDAOFactory
  */
 public interface ResourceDescriptorDAO extends DataAccessObject {
+	/**
+	 * Carries out a librarian search on the local data store.
+	 *
+	 * @param iRequest the object encapsulating the search parameters
+	 * @return the object encapsulating the search results
+	 */
+	public LibrarianResult doLibrarianSearch(LibrarianRequest iRequest);
 }

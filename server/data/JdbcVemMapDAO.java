@@ -59,6 +59,11 @@ public class JdbcVemMapDAO implements VemMapDAO
 			cleanUp(conn); // clean up
 		}
 	}
+	
+	public Persistent load(int iID) {
+		// STUB
+		return null;
+	}
 
 	public VemMap load(User iU, String iPattern) throws DataAccessException
 	{

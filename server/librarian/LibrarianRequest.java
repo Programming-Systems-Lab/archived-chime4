@@ -7,16 +7,18 @@
 
 package psl.chime4.server.librarian;
 
+import java.net.URI;
+
 /**
  * Encapsulates a librarian search request, which currently consists of a
- * query string and a list of URLs to probe but may eventually include other
+ * query string and a list of URIs to probe but may eventually include other
  * fields that constrain the search domain.
  *
  * @author Mark Ayzenshtat 
  */
 public class LibrarianRequest {
 	private String mQuery;
-	private String[] mURLs;
+	private URI[] mURIs;
 	
 	/**
 	 * Retrieves the search query.
@@ -37,20 +39,20 @@ public class LibrarianRequest {
 	}
 
 	/**
-	 * Retrieves the URLs to pass to FRAX.
+	 * Retrieves the URIs to pass to FRAX.
 	 *
-	 * @return the URLs
+	 * @return the URIs
 	 */
-	public String[] getURLs() {
-		return mURLs;
+	public URI[] getURIs() {
+		return mURIs;
 	}
 	
 	/**
-	 * Assigns the URLs to pass to FRAX.
+	 * Assigns the URIs to pass to FRAX.
 	 *
-	 * @param iURLs the URLs
+	 * @param iURIs the URIs
 	 */
-	public void setURLs(String[] iURLs) {
-		mURLs = iURLs;
+	public void setURIs(URI[] iURIs) {
+		mURIs = iURIs;
 	}
 }

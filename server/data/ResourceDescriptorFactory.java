@@ -21,7 +21,7 @@ public class ResourceDescriptorFactory {
 		new ResourceDescriptorFactory();
 	
 	private static final String kDefaultRDClassName = 
-		"psl.chime4.data.GenericResourceDescriptor";
+		"psl.chime4.server.data.GenericResourceDescriptor";
 	
 	private Map mProtocolMap;
 	

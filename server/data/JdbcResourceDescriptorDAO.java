@@ -9,6 +9,7 @@ package psl.chime4.server.data;
 
 import java.sql.*;
 import java.util.*;
+import psl.chime4.server.librarian.*;
 import psl.chime4.server.data.sql.*;
 
 /** 
@@ -163,6 +164,23 @@ public class JdbcResourceDescriptorDAO extends AbstractJdbcDAO
 	
 	public void delete(int iID) throws DataAccessException {
 		// TODO: Implement me
+	}
+
+	/**
+	 * Carries out a librarian search on the local data store.
+	 *
+	 * @param iRequest the object encapsulating the search parameters
+	 * @return the object encapsulating the search results
+	 */
+	public LibrarianResult doLibrarianSearch(LibrarianRequest iRequest) {
+		String query = iRequest.getQuery();
+		
+		LibrarianResult result = new LibrarianResult();
+		result.setSourceRequest(iRequest);
+		
+		//TODO: Implement me
+		
+		return result;
 	}
 
 	/**

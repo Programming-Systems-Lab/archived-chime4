@@ -26,7 +26,7 @@ public class ConnectionSourceFactory {
 		"ConnectionSourceClassName";
 	
 	private static final String kDefaultConnectionSourceClassName =
-		"psl.chime4.data.sql.PooledJdbcOneConnectionSource";
+		"psl.chime4.server.data.sql.PooledJdbcOneConnectionSource";
 	
 	private ConnectionSource mCS;
 	

@@ -25,17 +25,19 @@ import psl.chime4.server.vem.*;
 public class JdbcDAOFactory implements DAOFactory {
 	// a mapping of Persistent subclasses to DataAccessObject instances
 	private Map mDAOClassMap;
+	private boolean mShouldCacheDAOs;
 	
 	// package-scope constructor
 	JdbcDAOFactory() {
 		mDAOClassMap = new HashMap(20);
+		setShouldCacheDAOs(true);	// use cached DAOs by default
 		
 		// ResourceDescriptor
 		bindPersistentToDAO(ResourceDescriptor.class,
 			JdbcResourceDescriptorDAO.class);
 		
 		// VemMap
-		bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
+		//bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
 		
 		// AuthTicket
 		bindPersistentToDAO(AuthTicket.class, JdbcAuthTicketDAO.class);
@@ -67,6 +69,12 @@ public class JdbcDAOFactory implements DAOFactory {
 			);
 		}
 		
+		// if we're using cached DAO's, wrap the DAO we
+		// just constructed in a CachedDAO
+		if (mShouldCacheDAOs) {
+			dao = new CachedDAO(dao);
+		}
+		
 		// put the DAO instance in the map		
 		mDAOClassMap.put(iPersistentClass, dao);
 	}
@@ -77,8 +85,6 @@ public class JdbcDAOFactory implements DAOFactory {
 	 *
 	 * @param iPersistentClass the class of <code>Persistent</code> objects
 	 * that the returned <code>DataAccessObject</code> manages
-	 * @param iCached should the returned <code>DataAccessObject</code>
-	 * cache its contents in local memory?
 	 * @return a valid <code>DataAccessObject</code> instance	 
 	 * @exception IllegalArgumentException if the supplied class does not
 	 * inherit from <code>Persistent</code>
@@ -87,7 +93,7 @@ public class JdbcDAOFactory implements DAOFactory {
 	 * </code>objects
 	 * @see CachedDAO
 	 */
-	public DataAccessObject getDAO(Class iPersistentClass, boolean iCached) {
+	public DataAccessObject getDAO(Class iPersistentClass) {
 		if (!Persistent.class.isAssignableFrom(iPersistentClass)) {
 			throw new java.lang.IllegalArgumentException(
 				"Supplied class must inherit from Persistent.");
@@ -100,11 +106,23 @@ public class JdbcDAOFactory implements DAOFactory {
 			throw new IllegalArgumentException("No record of class: " + 
 				iPersistentClass);
 		}
-		
-		if (iCached) {
-			dao = new CachedDAO(dao);
-		}
-		
+				
 		return dao;
+	}
+	
+	/**
+	 * Returns whether this DAO factory should use cached DAOs.
+	 * @return whether this DAO factory should use cached DAOs
+	 */
+	public boolean getShouldCacheDAOs() {
+		return mShouldCacheDAOs;
+	}
+	
+	/**
+	 * Assigns whether this DAO factory should use cached DAOs.
+	 * @param iShouldCache whether this DAO factory should use cached DAOs
+	 */
+	public void setShouldCacheDAOs(boolean iShouldCache) {
+		mShouldCacheDAOs = iShouldCache;
 	}
 }

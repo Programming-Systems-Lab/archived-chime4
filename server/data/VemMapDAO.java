@@ -32,7 +32,7 @@ import psl.chime4.server.vem.*;
  * @author Vladislav Shchogolev
  * @version 1.0
  */
-public interface VemMapDAO
+public interface VemMapDAO //extends DataAccessObject
 {
 	/**
 	 * Saves the given VEM mapping to the backing data store.

@@ -19,8 +19,6 @@ public interface DAOFactory {
 	 *
 	 * @param iPersistentClass the class of <code>Persistent</code> objects
 	 * that the returned <code>DataAccessObject</code> manages
-	 * @param iCached should the returned <code>DataAccessObject</code>
-	 * cache its contents in local memory?
 	 * @return a valid <code>DataAccessObject</code> instance	 
 	 * @exception IllegalArgumentException if the supplied class does not
 	 * inherit from <code>Persistent</code>
@@ -29,7 +27,7 @@ public interface DAOFactory {
 	 * </code>objects
 	 * @see CachedDAO
 	 */
-	public DataAccessObject getDAO(Class iPersistentClass, boolean iCached);
+	public DataAccessObject getDAO(Class iPersistentClass);
 	
 	/**
 	 * Binds a class of <code>Persistent</code> objects to a class of
@@ -39,4 +37,16 @@ public interface DAOFactory {
 	 * @param iDAOClass the class of DataAccessObject instances
 	 */
 	public void bindPersistentToDAO(Class iPersistentClass, Class iDAOClass);
+
+	/**
+	 * Returns whether this DAO factory should use cached DAOs.
+	 * @return whether this DAO factory should use cached DAOs
+	 */
+	public boolean getShouldCacheDAOs();
+	
+	/**
+	 * Assigns whether this DAO factory should use cached DAOs.
+	 * @param iShouldCache whether this DAO factory should use cached DAOs
+	 */
+	public void setShouldCacheDAOs(boolean iShouldCache);
 }
