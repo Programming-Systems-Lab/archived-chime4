@@ -21,18 +21,18 @@ import psl.chime4.server.data.sql.SqlHelper;
 
 public class JdbcVemMapDAO extends AbstractJdbcDAO
 		implements VemMapDAO {
-    // table names
-    private static final String kTableVMs = "VemMappings";
-    
-    // column names
-    private static final String kColVMsMapID = "MapID";
-	private static final String kColVMsUID = "UserID";
-    private static final String kColVMsPattern = "Pattern";
-    private static final String kColVMsPriority = "Priority";
-    private static final String kColVMsType = "VemType";
-    private static final String kColVMsSubType = "SubType";
-    private static final String kColVMsShape = "ModelID";
-    private static final String kColVMsShape2D = "ImageID";
+  // table names
+  private static final String kTableVMs = "VemMappings";
+
+  // column names
+  private static final String kColVMsMapID = "MapID";
+  private static final String kColVMsUID = "UserID";
+  private static final String kColVMsPattern = "Pattern";
+  private static final String kColVMsPriority = "Priority";
+  private static final String kColVMsType = "VemType";
+  private static final String kColVMsSubType = "SubType";
+  private static final String kColVMsShape = "ModelID";
+  private static final String kColVMsShape2D = "ImageID";
     
 	// prepared statement for searching
 	private PreparedStatement searchStmt;
@@ -248,7 +248,7 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 		
 		// ...and their corresponding types
 		String[] types = {
-			"integer PRIMARY KEY", "integer", "integer", "varchar(250)",
+			"integer PRIMARY KEY AUTO_INCREMENT", "integer", "integer", "varchar(250)",
 			"integer", "varchar(10)", "integer", "integer"
 		};
 		

@@ -75,7 +75,7 @@ public class JdbcAuthTicketDAO extends AbstractJdbcDAO
 		
 		// ...and their corresponding types
 		String[] types = {
-			"integer PRIMARY KEY", "varchar(200)", "varchar(200)",
+			"integer PRIMARY KEY AUTO_INCREMENT", "varchar(200)", "varchar(200)",
 			"datetime", "datetime", "integer"
 		};
 		

@@ -205,7 +205,7 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 		
 		// ...and their corresponding types
 		String[] types = {
-			"integer PRIMARY KEY", "varchar(200)", "varchar(200)",
+			"integer PRIMARY KEY AUTO_INCREMENT", "varchar(200)", "varchar(200)",
 			"varbinary(32)", "integer"
 		};
 		

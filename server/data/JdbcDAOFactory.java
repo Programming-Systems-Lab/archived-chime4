@@ -15,6 +15,7 @@ import java.util.prefs.Preferences;
 // non-jdk imports
 import psl.chime4.server.auth.AuthTicket;
 import psl.chime4.server.auth.User;
+import psl.chime4.server.data.metadata.ResourceDescriptor;
 import psl.chime4.server.vem.*;
 
 /**
@@ -33,9 +34,8 @@ public class JdbcDAOFactory implements DAOFactory {
 		setShouldCacheDAOs(true);	// use cached DAOs by default
 		
 		// ResourceDescriptor
-    // FIXME: Uncomment once new ResDesDAOs are written
-		//bindPersistentToDAO(ResourceDescriptor.class,
-		//	JdbcResourceDescriptorDAO.class);
+		bindPersistentToDAO(ResourceDescriptor.class,
+      JdbcResourceDescriptorDAO.class);
 		
 		// VemMap
 		bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
