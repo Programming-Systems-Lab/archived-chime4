@@ -1,7 +1,7 @@
-package psl.chime4.server.cwm.world;
+package psl.chime4.server.cwm.world.view;
 
 /**
- * Represents a view of a Door object in the world.
+ * Represents what a Door looks like in the world.
  *
  * @author Azubuko Obele
  * @version 0.1
@@ -14,7 +14,7 @@ public class DoorView extends LocatableWorldObjectView
    /**
     * Get the thickness of the door.
     *
-    * @return the thickness of the door
+    * @return thickness of the door
     **/
    public int getThickness()
    {
@@ -24,11 +24,10 @@ public class DoorView extends LocatableWorldObjectView
    /**
     * Set the thickness of the door.
     *
-    * @param thickness the thickness of the object in the world
+    * @param thickness the thickness of the door
     **/
    public void setThickness(int thickness)
    {
       this.thickness = thickness;
-   }
+   }  
 }
-

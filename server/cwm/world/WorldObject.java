@@ -11,8 +11,8 @@ import psl.chime4.server.cwm.AbstractPersistentObject;
  **/
 public abstract class WorldObject extends AbstractPersistentObject
 {
-   /** object describing the type **/
-   private ResourceType type;
+   /** uri describing the type **/
+   private String typeURI;
    
    /** int describing the state **/
    private int state;
@@ -44,9 +44,9 @@ public abstract class WorldObject extends AbstractPersistentObject
     *
     * @return type for this object.
     **/
-   public ResourceType getType()
+   public String getTypeURI()
    {
-      return type;
+      return typeURI;
    }
    
    /**
@@ -54,9 +54,9 @@ public abstract class WorldObject extends AbstractPersistentObject
     *
     * @param type the type-ID for this object
     **/
-   public void setType(ResourceType type)
+   public void setTypeURI(String typeURI)
    {
-      this.type = type;
+      this.typeURI = typeURI;
    }
    
    /**

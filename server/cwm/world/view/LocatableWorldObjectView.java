@@ -1,31 +1,31 @@
-package psl.chime4.server.cwm.world;
+package psl.chime4.server.cwm.world.view;
 
 /**
- * A LocatableWorldObjectView is a view of an object that has a location and
- * dimensions within the three-dimensional world.
+ * This class represents the display of an object in the world that has a 
+ * location in the world.
  *
  * @author Azubuko Obele
  * @version 0.1
  **/
-public abstract class LocatableWorldObjectView extends WorldObjectView
+public class LocatableWorldObjectView extends View
 {
-   /** the x-location in the world **/
-   private int x = -1;
+   /** x-coord of the object **/
+   private int x;
    
-   /** the y-location in the world **/
-   private int y = -1;
+   /** y-coord of the object **/
+   private int y;
    
-   /** the z-location in the world **/
-   private int z = -1;
+   /** z-coord of the object **/
+   private int z;
    
-   /** the width of the object in the world **/
-   private int width = -1;
+   /** width of the object **/
+   private int width;
    
-   /** the height of the object in the world **/
-   private int height = -1;
+   /** height of the object **/
+   private int height;
    
-   /** the length of the object in the world **/
-   private int length = -1;
+   /** length of the object **/
+   private int length;
    
    /**
     * Get the x-coordinate of the object in the world.
