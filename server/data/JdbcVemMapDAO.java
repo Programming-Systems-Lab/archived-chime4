@@ -31,8 +31,8 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
     private static final String kColVMsPriority = "Priority";
     private static final String kColVMsType = "VemType";
     private static final String kColVMsSubType = "SubType";
-    private static final String kColVMsShape = "Shape";
-    private static final String kColVMsShape2D = "Shape2D";
+    private static final String kColVMsShape = "ModelID";
+    private static final String kColVMsShape2D = "ImageID";
     
 	// prepared statement for searching
 	private PreparedStatement searchStmt;
@@ -117,8 +117,8 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 			VemData data = new VemData();
 			data.setType(VemType.getTypeForCode(rs.getInt(kColVMsType)));
 			data.setSubType(rs.getString(kColVMsSubType).charAt(0));
-			data.setShape(rs.getString(kColVMsShape));
-			data.setShape2D(rs.getString(kColVMsShape2D));
+			data.setModelID(rs.getInt(kColVMsShape));
+			data.setImageID(rs.getInt(kColVMsShape2D));
 			
 			// instantiate an empty VemMap object
 			VemMap m = new VemMap(
@@ -126,8 +126,6 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 			
 			// copy values from the result set into the User object
 			m.setPersistenceID(iID);
-			
-			// FIXME: set priority for m
 			
 			return m;
 		} catch (SQLException ex) {			
@@ -248,7 +246,7 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 		// ...and their corresponding types
 		String[] types = {
 			"integer PRIMARY KEY", "integer", "integer", "varchar(250)",
-			"integer", "varchar(10)", "varchar(100)", "varchar(100)"
+			"integer", "varchar(10)", "integer", "integer"
 		};
 		
 		return SqlHelper.create(kTableVMs, columns, types);
@@ -278,8 +276,8 @@ public class JdbcVemMapDAO extends AbstractJdbcDAO
 			SqlHelper.prepareString(iU.getPattern()),
 			String.valueOf(iU.getVemData().getType().toInt()),
 			SqlHelper.prepareString(iU.getVemData().getSubType() + ""),
-			SqlHelper.prepareString(iU.getVemData().getShape()),
-			SqlHelper.prepareString(iU.getVemData().getShape2D())
+			String.valueOf(iU.getVemData().getModelID()),
+			String.valueOf(iU.getVemData().getImageID())
 		};
 		
 		String whereClause = (new StringBuffer(kColVMsMapID)).append(" = ")

@@ -12,7 +12,7 @@ package psl.chime4.server.vem;
  * artifact in the database.
  *
  * @author Vladislav Shchogolev
- * @version 1.0
+ * @version $Revision$
  */
 
 public class VemData {
@@ -21,10 +21,10 @@ public class VemData {
 	private VemType mType;
 	/** The sub-class-type for this object */
 	private char mSubType;
-	/** The filename of the 3D model representing this object */
-	private String mShape;
-	/** The filename of the 2D model representing this object */
-	private String mShape2D;
+	/** The ResourceID of the 3D model representing this object */
+	private int mModelID;
+	/** The ResourceID of the 2D model representing this object */
+	private int mImageID;
 
 	public VemData() {
 	}
@@ -45,32 +45,32 @@ public class VemData {
 		mType = type;
 	}	
 	
-	/** Getter for property shape.
-	 * @return Value of property shape.
+	/** Getter for property ModelID.
+	 * @return Value of property ModelID.
 	 */
-	public String getShape() {
-		return mShape;
+	public int getModelID() {
+		return mModelID;
 	}
 	
-	/** Setter for property shape.
-	 * @param shape New value of property shape.
+	/** Setter for property ModelID.
+	 * @param shape New value of property ModelID.
 	 */
-	public void setShape(String shape) {
-		mShape = shape;
+	public void setModelID(int model) {
+		mModelID = model;
 	}
 	
-	/** Getter for property shape2D.
-	 * @return Value of property shape2D.
+	/** Getter for property imageID.
+	 * @return Value of property imageID.
 	 */
-	public String getShape2D() {
-		return mShape2D;
+	public int getImageID() {
+		return mImageID;
 	}
 	
 	/** Setter for property shape2D.
 	 * @param shape2D New value of property shape2D.
 	 */
-	public void setShape2D(String shape2D) {
-		mShape2D = shape2D;
+	public void setImageID(int image) {
+		mImageID = image;
 	}
 	
 	/** Getter for property subType.
