@@ -10,6 +10,8 @@ class EMModel: public EMEntity
 		EMModel( char *file, ChimeID setID );
 		~EMModel( void );
 
+		int updateModel( char *file );
+
 		void *getModelData( int *length );
 
 	protected:

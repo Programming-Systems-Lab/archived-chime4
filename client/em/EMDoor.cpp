@@ -11,6 +11,18 @@ EMDoor::EMDoor( ChimeID setID, ChimeID roomOne, ChimeID roomTwo,
 	linkRooms[1] = EnvironmentModeler::getRoom( roomTwo );
 }
 
+void EMDoor::setLinkRooms( EMRoom *roomOne, EMRoom *roomTwo )
+{
+	linkRooms[0] = roomOne;
+	linkRooms[1] = roomTwo;
+}
+
+void EMDoor::setLinkCoords( Coords coordsOne, Coords coordsTwo )
+{
+	linkCoords[0] = coordsOne;
+	linkCoords[1] = coordsTwo;
+}
+
 EMRoom **EMDoor::getLinkRooms( void )
 {
 	return linkRooms;

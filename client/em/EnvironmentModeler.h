@@ -31,7 +31,7 @@ class EnvironmentModeler
 		static void placeRoom( ChimeID setID, Coords setDim, ChimeID setModel );
 		static void placeDoor( ChimeID setID, ChimeID roomOne, ChimeID roomTwo,
 			Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel );
-		static void placeObjet( ChimeID setID, ChimeID setRoom, Coords setDim,
+		static void placeObject( ChimeID setID, ChimeID setRoom, Coords setDim,
 			Coords setCoords, ChimeID setModel );
 		static void placeAvatar( ChimeID setID, ChimeID setRoom, Coords setDim,
 			Coords setCoords, ChimeID setModel );

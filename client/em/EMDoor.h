@@ -8,6 +8,9 @@ class EMDoor: public EMElement
 		EMDoor( ChimeID setID, ChimeID roomOne, ChimeID roomTwo,
 			Coords setDim, Coords coordsOne, Coords coordsTwo, ChimeID setModel );
 
+		void setLinkRooms( EMRoom *roomOne, EMRoom *roomTwo );
+		void setLinkCoords( Coords coordsOne, Coords coordsTwo );
+
 		EMRoom **getLinkRooms( void );
 		Coords *getLinkCoords( void );
 

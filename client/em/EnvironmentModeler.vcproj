@@ -101,6 +101,9 @@
 				RelativePath="EMAvatar.cpp">
 			</File>
 			<File
+				RelativePath="EMCoords.cpp">
+			</File>
+			<File
 				RelativePath="EMDoor.cpp">
 			</File>
 			<File

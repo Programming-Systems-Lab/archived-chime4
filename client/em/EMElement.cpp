@@ -22,6 +22,11 @@ void EMElement::setModel( ChimeID setModelID )
 	model = EnvironmentModeler::getModel( setModelID );
 }
 
+void EMElement::setDimensions( Coords setDims )
+{
+	dimensions = setDims;
+}
+
 EMModel *EMElement::getModel( void )
 {
 	return model;

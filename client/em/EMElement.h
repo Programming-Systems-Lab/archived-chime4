@@ -15,8 +15,9 @@ class EMElement: public EMEntity
 		virtual ~EMElement( void );
 
 		void setModel( ChimeID setModelID );
-		EMModel *getModel( void );
+		void setDimensions( Coords setDims );
 
+		EMModel *getModel( void );
 		Coords getDimensions( void );
 
 	private:
