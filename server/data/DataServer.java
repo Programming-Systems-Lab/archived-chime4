@@ -15,6 +15,9 @@ import org.jdom.*;
 import org.jdom.input.*;
 import psl.chime.sienautils.*;	// for FRAX
 import psl.chime.frax.*;	// for FRAX
+import psl.chime4.server.data.metadata.*;
+import psl.chime4.server.data.metadata.ResourceDescriptor;
+import psl.chime4.server.data.metadata.ResourceDescriptorFactory;
 import psl.chime4.server.di.*;
 import psl.chime4.server.librarian.*;
 
@@ -97,7 +100,7 @@ public class DataServer {
 	public void completeMetadata(ResourceDescriptor iRD) {
 		URI u = null;		
 		try {			
-			u = new URI(iRD.getProtocol().toLowerCase() + "://" + iRD.getPath());
+			u = new URI(iRD.getProtocol().toLowerCase() + "://" + iRD.getName());
 		} catch (URISyntaxException ex) {
 			throw new 
 				RuntimeException("Could not form URI from resource descriptor.");
@@ -196,7 +199,7 @@ public class DataServer {
 		// NOTE: We just use a SienaObject as a container; we're not actually
 		//       putting any data on the Siena bus
 		SienaObject s = new SienaObject(iTarget.getScheme(), iTarget.toString(),
-			"Chime4DataServer", null, null, null, false);		
+			"Chime4DataServer", null, null, null, false);
 						
 		try {
 			FRAXProtLoader fpl = new FRAXProtLoader();
@@ -220,7 +223,7 @@ public class DataServer {
 	 * around, it will go the way of the dodo.
 	 */
 	private ResourceDescriptor fillRDFromXML(String iXML,
-			ResourceDescriptor iRD) {
+			ResourceDescriptor iRD) {    
 		System.out.println(iXML);
 				
 		Document doc = null;
@@ -232,38 +235,8 @@ public class DataServer {
 		} catch (JDOMException ex) {
 			throw new RuntimeException("Could not build document from raw XML.");
 		}
-		
-		Element root = doc.getRootElement();
-		
-		///////////////////////////////////
-		// set fields in ResourceDescriptor
-		///////////////////////////////////
-		
-		// set type
-		iRD.setType(root.getAttribute("type").getValue());
-		
-		// set content type
-		iRD.setContentType(root.getChildTextTrim("Type"));
-		
-		// set size
-		try {
-			iRD.setSize(Integer.parseInt(root.getChildTextTrim("Size")));
-		} catch (NumberFormatException ex) {
-		}
-		
-		// set time created
-		try {
-			iRD.setTimeCreated(new Date(Long.parseLong(
-				root.getAttribute("createDate").getValue())));
-		} catch (NumberFormatException ex) {
-		}
-		
-		// set time last modified
-		try {
-			iRD.setTimeLastModified(new Date(Long.parseLong(
-				root.getChildTextTrim("Last-Modified"))));
-		} catch (NumberFormatException ex) {
-		}
+    
+    iRD.completeFromDocument(doc);
 		
 		return iRD;
 	}
@@ -272,9 +245,23 @@ public class DataServer {
 		DataServer ds = new DataServer();
 		
 		ResourceDescriptor rd = ResourceDescriptorFactory
-			.getInstance().newRD("http");		
-		rd.setPath("localhost:8080");
+			.getInstance().newRD("text/html");		
+		rd.setProtocol("HTTP");
+    rd.setName("www.cs.columbia.edu");
 		
 		ds.completeMetadata(rd);
-	}
+	
+    System.out.println("HEMLOCK");
+    System.out.println(rd.getName());
+    System.out.println(rd.getProtocol());
+    System.out.println(rd.getSize());
+    System.out.println(rd.getType());
+    System.out.println(rd.getWhenLastModified());
+    System.out.println();
+    HtmlResourceDescriptor hrd = (HtmlResourceDescriptor) rd;
+    String[] links = hrd.getLinks();
+    for (int i = 0; i < links.length; i++) {
+      System.out.println(links[i]);
+    }
+  }
 }

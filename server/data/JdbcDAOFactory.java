@@ -33,8 +33,9 @@ public class JdbcDAOFactory implements DAOFactory {
 		setShouldCacheDAOs(true);	// use cached DAOs by default
 		
 		// ResourceDescriptor
-		bindPersistentToDAO(ResourceDescriptor.class,
-			JdbcResourceDescriptorDAO.class);
+    // FIXME: Uncomment once new ResDesDAOs are written
+		//bindPersistentToDAO(ResourceDescriptor.class,
+		//	JdbcResourceDescriptorDAO.class);
 		
 		// VemMap
 		bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);

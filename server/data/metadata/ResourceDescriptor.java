@@ -8,6 +8,7 @@
 package psl.chime4.server.data.metadata;
 
 import java.util.Date;
+import org.jdom.Document;
 import psl.chime4.server.data.Persistent;
 
 /**
@@ -106,4 +107,14 @@ public interface ResourceDescriptor extends Persistent {
 	 * @param iData any additional data this resource descriptor has
 	 */  
   public void setAdditionalData(String[] iAddtlData);
+  
+  /**
+   * Completes the fields of this resource descriptor with data from the
+   * supplied <code>Document</code> object.  Concrete subclasses should
+   * always call <code>super.completeFromDocument(iDoc)</code> before providing
+   * their own additional implementation.
+   *
+   * @param iDoc the document
+   */
+  public void completeFromDocument(Document iDoc);
 }

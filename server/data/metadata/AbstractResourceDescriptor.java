@@ -7,7 +7,10 @@
 
 package psl.chime4.server.data.metadata;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
+import org.jdom.*;
 
 /**
  * Provides a skeletal implementation of <code>ResourceDescriptor</code>.
@@ -16,12 +19,24 @@ import java.util.Date;
  */
 public abstract class AbstractResourceDescriptor
     implements ResourceDescriptor {
+	private static final Date kZeroDate = new Date(0);
+	private static final String kZeroString = "";
+  
   private int mPersistenceID;
   private String mName;
   private String mProtocol;
   private String mType;
   private int mSize;
   private Date mLastModified;
+  
+  protected AbstractResourceDescriptor() {
+    setPersistenceID(0);
+    setName(kZeroString);
+    setProtocol(kZeroString);
+    setType(kZeroString);
+    setSize(0);
+    setWhenLastModified(kZeroDate);
+  }
   
 	/**
 	 * Retrieves the unique ID that serves as a persistence key to this object.
@@ -129,5 +144,39 @@ public abstract class AbstractResourceDescriptor
 	 */  
   public void setWhenLastModified(Date iLastModified) {
     mLastModified = iLastModified;
+  }
+  
+  /**
+   * Completes the fields of this resource descriptor with data from the
+   * supplied <code>Document</code> object.  Concrete subclasses should
+   * always call <code>super.completeFromDocument(iDoc)</code> before providing
+   * their own additional implementation.
+   *
+   * @param iDoc the document
+   */
+  public void completeFromDocument(Document iDoc) {
+		Element root = iDoc.getRootElement();
+		
+    // set name
+    setName(root.getChildTextTrim("Name"));
+    
+    // set protocol
+    setProtocol(root.getChildTextTrim("Protocol"));
+    
+		// set type
+		setType(root.getChildTextTrim("Type"));
+		
+		// set size
+		try {
+			setSize(Integer.parseInt(root.getChildTextTrim("Size")));
+		} catch (NumberFormatException ex) {
+		}
+		
+		// set time last modified
+		try {
+      setWhenLastModified(DateFormat.getDateTimeInstance()
+        .parse(root.getChildTextTrim("Last-Modified")));
+		} catch (ParseException ex) {
+		}
   }
 }
