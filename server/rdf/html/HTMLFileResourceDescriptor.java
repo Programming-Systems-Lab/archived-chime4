@@ -1,5 +1,7 @@
 package psl.chime4.server.rdf;
 
+import psl.chime4.server.rdf.FileResourceDescriptor;
+
 /**
  * An HTMLResourceDescriptor describes an HTML file. It contains all
  * relevant metadata about the HTML file but none of its content.

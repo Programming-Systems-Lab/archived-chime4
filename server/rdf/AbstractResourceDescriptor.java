@@ -19,9 +19,6 @@ public abstract class AbstractResourceDescriptor
    /** the resource type constant **/
    private String typeID_;
    
-   /** whether the FileResourceDescriptor has been completed **/
-   private boolean completed_;
-   
    /**
     * Protected default constructor.
     **/
@@ -30,7 +27,6 @@ public abstract class AbstractResourceDescriptor
       persistenceID_ = -1;
       uri_ = null;
       typeID_ = null;
-      completed_ = false;
    }
    
       
@@ -96,28 +92,5 @@ public abstract class AbstractResourceDescriptor
    public void setTypeIdentifier(String typeID)
    {
       this.typeID_ = typeID;
-   }
-   
-   /**
-    * Get the completed status for the ResourceDescriptor. The 
-    * ResourceDescriptor is completed if the DataServer has filled in all
-    * its metadata fields.
-    *
-    * @return completed status of the ResourceDescriptor
-    **/
-   public boolean isComplete()
-   {
-      return completed_;
-   }
-   
-   /**
-    * Set the completed status for the ResourceDescriptor.
-    *
-    * @param completed <code>true</code> iff the ResourceDescriptor has been
-    *                  completed by the DataServer.
-    **/
-   public void setComplete(boolean completed)
-   {
-      this.completed_ = completed;
    }
 }

@@ -35,22 +35,6 @@ public interface ResourceDescriptor extends Persistable
    public void setURI(String uri);
    
    /**
-    * A ResourceDescriptor is considered 'complete' when all of its 
-    * metadata fields have been filled in by the DataServer.
-    *
-    * @return <code>true</code> if the DataServer has filled in all of the
-    *         metadata fields of the ResourceDescriptor
-    **/
-   public boolean isComplete();
-   
-   /**
-    * Change the 'complete' status of the ResourceDescriptor.
-    *
-    * @param complete the new complete status of the ResourceDescriptor
-    **/
-   public void setComplete(boolean complete);
-   
-   /**
     * Return the resource type identifier. The type identifier is a string 
     * that uniquely identifies a given type of resource. 
     *
@@ -63,5 +47,5 @@ public interface ResourceDescriptor extends Persistable
     *
     * @param typeID resource type identifier string
     **/
-   public void setTypeIdentifier(String typeID);
+   public void setTypeIdentifier(String typeID);  
 }

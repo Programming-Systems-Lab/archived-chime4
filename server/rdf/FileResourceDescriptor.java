@@ -8,7 +8,8 @@ package psl.chime4.server.rdf;
  * @author Azubuko Obele
  * @version 0.1
  **/
-public abstract class FileResourceDescriptor implements ResourceDescriptor
+public abstract class FileResourceDescriptor 
+   extends AbstractResourceDescriptor
 {  
    /** the time the file was created **/
    private long timeCreated_;
@@ -178,7 +179,7 @@ public abstract class FileResourceDescriptor implements ResourceDescriptor
     *
     * @return any additional data this resource descriptor has
     */
-    abstract String[] getAdditionalData();
+    public abstract String[] getAdditionalData();
 	
    /**
     * Assigns any additional data this resource descriptor has.  This method
@@ -187,5 +188,5 @@ public abstract class FileResourceDescriptor implements ResourceDescriptor
     *
     * @param iData any additional data this resource descriptor has
     */
-   abstract void setAdditionalData(String[] iData);
+   public abstract void setAdditionalData(String[] iData);
 }
