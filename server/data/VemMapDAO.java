@@ -41,9 +41,10 @@ public interface VemMapDAO extends DataAccessObject
 	 * @param iU the User ID
 	 * @param iPattern either a complete file name or a extension pattern
 	 * (like *.html)
-	 * @return the loaded resource descriptor
+	 * @return the persistence ID of the mapping for this search
+	 *			or -1 if the search did not find any results
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
-	public VemMap search(int iUID, String iPattern) throws DataAccessException;
+	public int search(int iUID, String iPattern) throws DataAccessException;
 }

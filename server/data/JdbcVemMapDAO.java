@@ -19,12 +19,14 @@ import psl.chime4.server.data.sql.*;
  * @version 1.0
  */
 
-public class JdbcVemMapDAO implements VemMapDAO {
+public class JdbcVemMapDAO extends AbstractJdbcDAO
+		implements VemMapDAO {
     // table names
     private static final String kTableVMs = "VemMappings";
     
     // column names
-    private static final String kColVMsUID = "UserID";
+    private static final String kColVMsMapID = "MapID";
+	private static final String kColVMsUID = "UserID";
     private static final String kColVMsPattern = "Pattern";
     private static final String kColVMsPriority = "Priority";
     private static final String kColVMsType = "VemType";
@@ -32,115 +34,281 @@ public class JdbcVemMapDAO implements VemMapDAO {
     private static final String kColVMsShape = "Shape";
     private static final String kColVMsShape2D = "Shape2D";
     
-    // prepared statements
-    private PreparedStatement searchStmt, insertStmt;
-    
-    // connection
-    private ConnectionSource mConnectionSource;
-    
-    JdbcVemMapDAO() {
-        // get a connection source from the factory
-        mConnectionSource = ConnectionSourceFactory.getInstance()
-        .getConnectionSource();
-    }
-    
-    public void store(VemMap iVM) throws DataAccessException {
+	// prepared statement for searching
+	private PreparedStatement searchStmt;
+	
+	/*
+	 * Package-scope constructor to ensure instantiation through factory.
+	 */
+	JdbcVemMapDAO() {
+		super();
+	}
+
+	/**
+	 * Creates a persistent object in the backing data store.
+	 *
+	 * @return the ID that uniquely identifies the created persistent object
+	 * @exception DataAccessException if this operation cannot complete
+	 * due to a failure in the backing store
+	 */
+	public int create() throws DataAccessException
+	{
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		// get a connection
+		conn = getConnection();
+		
+		try {
+			stmt = conn.createStatement();
+			
+			// create the row
+			stmt.executeUpdate(buildCreateMapStatement());
+			
+			// get the ID of the row we just created
+			rs = stmt.executeQuery(buildGetMaxIDQuery());
+			rs.next();
+			
+			return rs.getInt(1);
+		} catch (SQLException ex) {
+			throw new DataAccessException("Error creating mapping.", ex);
+		} finally {
+			cleanUp(conn, stmt, rs);
+		}
+	}
+	
+	/**
+	 * Deletes a persistent object from the backing data store.
+	 *
+	 * @param iID the ID that uniquely identifies the persistent object
+	 * @exception DataAccessException if this operation cannot complete
+	 * due to a failure in the backing store
+	 */
+	public void delete(int iID) throws DataAccessException
+	{
+		//FIXME: Implement
+	}
+
+	/**
+	 * Loads the persistent object with the given ID from the
+	 * backing data store.
+	 *
+	 * @param iID the ID
+	 * @return the loaded persistent object
+	 * @exception DataAccessException if this operation cannot complete
+	 * due to a failure in the backing store
+	 */
+	public Persistent load(int iID) throws DataAccessException
+	{
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		// milk the connection source
+		conn = getConnection();
+				
+		// load the mapping
+		try {
+			stmt = conn.createStatement();			
+			rs = stmt.executeQuery(buildLoadMapQuery(iID));			
+			rs.next();
+			
+			VemData data = new VemData();
+			data.setType(VemType.getTypeForCode(rs.getInt(kColVMsType)));
+			data.setSubType(rs.getString(kColVMsSubType).charAt(0));
+			data.setShape(rs.getString(kColVMsShape));
+			data.setShape2D(rs.getString(kColVMsShape2D));
+			
+			// instantiate an empty VemMap object
+			VemMap m = new VemMap(
+				rs.getInt(kColVMsUID), rs.getString(kColVMsPattern), data);			
+			
+			// copy values from the result set into the User object
+			m.setPersistenceID(iID);
+			
+			// FIXME: set priority for m
+			
+			return m;
+		} catch (SQLException ex) {			
+			throw new DataAccessException("Error loading mapping.", ex);
+		} finally {
+			cleanUp(conn, stmt, rs);
+		}
+	}
+	
+	/**
+	 * Saves the given persistent object to the backing data store.
+	 *
+	 * @param iR the persistent object to save
+	 * @exception DataAccessException if this operation cannot complete
+	 * due to a failure in the backing store
+	 */
+	public void store(Persistent iP) throws DataAccessException
+	{
+		// ClassCastException will be thrown here if cast fails
+		VemMap m = (VemMap) iP;		
+		
+		Connection conn = null;
+		Statement stmt = null;
+		
+		conn = getConnection();
+				
+		try {
+			stmt = conn.createStatement();
+			
+			// store user
+			stmt.executeUpdate(buildStoreMapStatement(m));
+		} catch (SQLException ex) {			
+			throw new DataAccessException("Error storing mapping.", ex);
+		} finally {
+			cleanUp(conn, stmt, null);
+		}
+	}
+	
+	/**
+	 * Ensures that data tables exist.  If they do not exist, it is expected
+	 * that they will after this method completes.
+	 */
+	protected void ensureTablesExist() throws DataAccessException
+	{
+		Connection conn = null;
+		Statement stmt = null;
+		
+		// get a connection
+		conn = getConnection();
+				
+		try {
+			stmt = conn.createStatement();			
+			
+			// attempt to create users table
+			try {
+				stmt.execute(buildCreateMapTableStatement());
+			} catch (SQLException ex2) {
+				// if an exception is thrown, it means the table already exists				
+			}
+		} catch (SQLException ex) {			
+			throw new
+				DataAccessException("Error while attempting to create tables.", ex);
+		} finally {
+			cleanUp(conn, stmt, null);
+		}			
+	}	
+	
+
+    public int search(int iUID, String iPattern) throws DataAccessException {
         Connection conn = getConnection();
-        
+		ResultSet rs = null;
+		
         try {
-            prepareInsert(conn, iVM);
-            insertStmt.executeUpdate();
-        } catch (SQLException sqle) {
-            throw new DataAccessException("Error in storing VEM Mapping", sqle);
-        } finally {
-            cleanUp(conn); // clean up
-        }
-    }
-    
-    public Persistent load(int iID) {
-        // STUB
-        return null;
-    }
-    
-    public VemMap load(User iU, String iPattern) throws DataAccessException {
-        Connection conn = getConnection();
-        
-        try {
-            prepareSearch(conn, iU, iPattern);
-            ResultSet rs = searchStmt.executeQuery();
+            prepareSearch(conn, iUID, iPattern);
+            rs = searchStmt.executeQuery();
             if (rs.next()) {	// grab first row of the table
-                // populate VemData object
-                VemData data = new VemData();
-                data.setType(VemType.getTypeForCode(rs.getInt(kColVMsType)));
-                data.setSubType((char)rs.getByte(kColVMsSubType));
-                data.setShape(rs.getString(kColVMsShape));
-                data.setShape2D(rs.getString(kColVMsShape2D));
-                return new VemMap(iU, iPattern, data);
+                return rs.getInt(kColVMsMapID);
             } else
-                return null;
+                return -1;
         } catch (SQLException sqle) {
-            throw new DataAccessException("Error in loading VEM Mapping", sqle);
+            throw new DataAccessException("Error finding mapping", sqle);
         } finally {
-            cleanUp(conn); // clean up
+            cleanUp(conn, searchStmt, rs);
         }
     }
-    
-    private void prepareSearch(Connection conn, User iU, String iP)
+	
+    private void prepareSearch(Connection conn, int iU, String iP)
     throws SQLException {
         if (searchStmt == null) {	// if first time use, create new statement
             String cols[] = {
-                kColVMsType, kColVMsSubType, kColVMsShape, kColVMsShape2D,
-                kColVMsPriority
+                kColVMsMapID, kColVMsPriority
             };
             
-            String whereClause = "(userID = 0 OR userID = '?') AND " +
-            "(pattern = '?' OR pattern = '?')";
+            String whereClause = 
+				"("+kColVMsUID+" = "+User.GLOBAL_ID+" OR "+kColVMsUID+" = '?') AND " +
+				"("+kColVMsPattern+" = '?' OR "+kColVMsPattern+" = '?')";
             
-            // order by priority (5)
+            // order by priority (2nd column)
             searchStmt = conn.prepareStatement(
-            SqlHelper.select(cols, kTableVMs, whereClause, "5"));
+				SqlHelper.select(cols, kTableVMs, whereClause, "2"));
         }
         
         // parameter indexes refer to the ? in the whereClause string
-        searchStmt.setInt(1, iU.getPersistenceID());
+        searchStmt.setInt(1, iU);
         searchStmt.setString(2, iP);
         searchStmt.setString(3, VemMap.getExtensionPattern(iP));
-    }
-    
-    private void prepareInsert(Connection conn, VemMap iVM)
-    throws SQLException {
-        VemData vd = iVM.getVemData();
-        
-        if (insertStmt == null) {	 // if first time use, create new statement
-            String insertCode = "INSERT INTO " + kTableVMs +
-            " VALUES ('?', '?', '?', '?', '?', '?', '?')";
-            insertStmt = conn.prepareStatement(insertCode);
-        }
-        
-        // parameter indexes refer to the ? in the insertCode string
-        insertStmt.setInt(1, iVM.getUser().getPersistenceID()); // set the user ID
-        insertStmt.setString(2, iVM.getPattern());  // set the URI pattern
-        insertStmt.setInt(3, iVM.getPriority());    // set the priority
-        insertStmt.setInt(4, vd.getType().toInt());	// vem type
-        insertStmt.setByte(5, (byte)vd.getSubType());	// vem sub type
-        insertStmt.setString(6, vd.getShape());	// vem shape
-        insertStmt.setString(7, vd.getShape2D());	// vem shape 2d
-    }
-    
-    private Connection getConnection() throws DataAccessException {
-        try {
-            return mConnectionSource.obtainConnection();
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not obtain connection.", ex);
-        }
-    }
-    
-    private void cleanUp(Connection conn) throws DataAccessException {
-        try {
-            mConnectionSource.releaseConnection(conn);
-        } catch (SQLException ex) {
-            throw new
-            DataAccessException("Could not dispose of connection.", ex);
-        }
-    }
+    }	
+	
+	// query/statement builders -- methods that neatly assemble the SQL
+	// statements that we're sending to the DB
+	private String buildCreateMapTableStatement() {
+		// table columns...
+		String columns[] = {
+			kColVMsMapID, kColVMsUID, kColVMsPriority, kColVMsPattern, 
+			kColVMsType, kColVMsSubType, kColVMsShape, kColVMsShape2D
+		};
+		
+		// ...and their corresponding types
+		String[] types = {
+			"integer PRIMARY KEY", "integer", "integer", "varchar(250)",
+			"integer", "varchar(10)", "varchar(100)", "varchar(100)"
+		};
+		
+		return SqlHelper.create(kTableVMs, columns, types);
+	}	
+
+	private String buildLoadMapQuery(int iID) {
+		String columns[] = {
+			kColVMsUID, kColVMsPriority, kColVMsPattern, 
+			kColVMsType, kColVMsSubType, kColVMsShape, kColVMsShape2D
+		};
+
+		String whereClause = (new StringBuffer(kColVMsMapID)).append(" = ")
+			.append(iID).toString();
+		
+		return SqlHelper.select(columns, kTableVMs, whereClause);
+	}
+
+	private String buildStoreMapStatement(VemMap iU) {
+		String columns[] = {
+			kColVMsUID, kColVMsPriority, kColVMsPattern, 
+			kColVMsType, kColVMsSubType, kColVMsShape, kColVMsShape2D
+		};
+		
+		String[] values = {
+			String.valueOf(iU.getUserID()),
+			String.valueOf(iU.getPriority()),
+			SqlHelper.prepareString(iU.getPattern()),
+			String.valueOf(iU.getVemData().getType().toInt()),
+			SqlHelper.prepareString(iU.getVemData().getSubType() + ""),
+			SqlHelper.prepareString(iU.getVemData().getShape()),
+			SqlHelper.prepareString(iU.getVemData().getShape2D())
+		};
+		
+		String whereClause = (new StringBuffer(kColVMsMapID)).append(" = ")
+			.append(iU.getPersistenceID()).toString();
+		
+		return SqlHelper.update(kTableVMs, columns, values, whereClause);
+	}
+	
+	private String buildCreateMapStatement() {
+		String[] columns = {
+			kColVMsPriority
+		};
+		
+		String[] values = {
+			String.valueOf(999)		// dummy value, so we can complete the INSERT
+		};
+		
+		return SqlHelper.insert(kTableVMs, columns, values);
+	}
+	
+	private String buildGetMaxIDQuery() {
+		return new StringBuffer(50).append("SELECT MAX(").append(kColVMsMapID)
+			.append(") FROM ").append(kTableVMs).toString();
+	}
+	
+	private String buildDeleteMapStatement(int iID) {
+		String whereClause = new StringBuffer(50).append(kColVMsMapID)
+			.append(" = ").append(iID).toString();
+		
+		return SqlHelper.delete(kTableVMs, whereClause);
+	}	
 }
