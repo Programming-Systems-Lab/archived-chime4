@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
 import java.util.HashMap;
 import java.util.Map;

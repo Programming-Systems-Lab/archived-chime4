@@ -5,9 +5,9 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
-import psl.chime4.vem.*;
+import psl.chime4.server.vem.*;
 
 /**
  * This class manages a store of mappings between (User ID, file pattern) pairs

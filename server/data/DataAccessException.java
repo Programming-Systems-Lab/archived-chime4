@@ -5,9 +5,9 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
-import psl.chime4.base.ChimeException;
+import psl.chime4.server.base.ChimeException;
 
 /**
  * Indicates that an error occurred while accessing a backing data store.

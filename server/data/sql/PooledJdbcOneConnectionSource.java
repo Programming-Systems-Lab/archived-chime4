@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data.sql;
+package psl.chime4.server.data.sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,7 +31,7 @@ public class PooledJdbcOneConnectionSource implements ConnectionSource {
 	private static final String kKeyJdbcOneDriver = "JdbcOneDriver";
 	private static final String kKeyJdbcOneURL = "JdbcOneURL";
 	private static final String kKeyJdbcOneUserName = "JdbcOneUserName";
-	private static final String kKeyJdbcOnePassword = "JdbcOnePassword";	
+	private static final String kKeyJdbcOnePassword = "JdbcOnePassword";
 	
 	// default preference values
 	private static final String kDefaultJdbcOneDriver =

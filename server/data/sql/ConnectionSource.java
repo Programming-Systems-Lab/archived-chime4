@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data.sql;
+package psl.chime4.server.data.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;

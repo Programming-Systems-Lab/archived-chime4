@@ -5,7 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
 // jdk imports
 import java.util.HashMap;
@@ -13,8 +13,7 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 
 // non-jdk imports
-import psl.chime4.metadata.*;
-import psl.chime4.vem.*;
+import psl.chime4.server.vem.*;
 
 /**
  * A factory for creating JDBC-implemented <code>DataAccessObject</code>s.

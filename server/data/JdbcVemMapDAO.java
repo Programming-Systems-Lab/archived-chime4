@@ -5,11 +5,11 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
 import java.sql.*;
-import psl.chime4.vem.*;
-import psl.chime4.data.sql.*;
+import psl.chime4.server.vem.*;
+import psl.chime4.server.data.sql.*;
 
 /**
  * Implements VemMapDAO using a JDBC database connection

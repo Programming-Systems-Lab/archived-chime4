@@ -5,11 +5,11 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
+package psl.chime4.server.data;
 
 import java.sql.*;
 import java.util.*;
-import psl.chime4.data.sql.*;
+import psl.chime4.server.data.sql.*;
 
 /** 
  * Manages the persistence of <code>ResourceDescriptor</code> objects to a
@@ -150,7 +150,7 @@ public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {
 			// store additional data if necessary			
 			if (hasMoreData) {
 				stmt.executeUpdate(buildMoreDataStatement(moreData));
-			}
+			}      
 		} catch (SQLException ex) {			
 			throw new
 				DataAccessException("Error storing resource descriptor.", ex);

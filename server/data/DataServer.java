@@ -5,9 +5,7 @@
  * in the City of New York.  All Rights Reserved.
  */
 
-package psl.chime4.data;
-
-import psl.chime4.metadata.ResourceDescriptor;
+package psl.chime4.server.data;
 
 /**
  * The <code>DataServer</code> class represents the central access point for
