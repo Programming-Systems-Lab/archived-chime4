@@ -87,7 +87,15 @@ public class DataServer {
 	}
 	
 	public void completeMetadata(ResourceDescriptor iRD) {
-		// TODO: Implement me.
+		URI u = null;		
+		try {
+			u = new URI(iRD.getProtocol(), iRD.getPath(), null);
+		} catch (URISyntaxException ex) {
+			throw new 
+				RuntimeException("Could not form URI from resource descriptor.");
+		}
+		
+		iRD = queryFrax(u);
 	}
 	
 	/**
