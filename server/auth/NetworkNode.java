@@ -149,8 +149,8 @@ public class NetworkNode {
      * Returns a new NetworkNode with IP/hostname info preset to the local
      * system
      **/
-    public static NetworkNode localServer(String userID, AuthTicket auth) {
-	NetworkNode local = new NetworkNode(userID, auth);
+    public static NetworkNode localServer() {
+	NetworkNode local = new NetworkNode(null, null);
 
 	try {
 	    InetAddress ipAddress = InetAddress.getLocalHost();
@@ -161,6 +161,20 @@ public class NetworkNode {
 	    e.printStackTrace();
 	}
 
+	return local;
+    }
+
+
+
+
+
+    /**
+     * Returns a new NetworkNode with IP/hostname/userID/auth info filled in
+     **/
+    public static NetworkNode localServer(String userID, AuthTicket auth) {
+	NetworkNode local = localServer();
+	local.setUsername(userID);
+	local.setAuthTicket(auth);
 	return local;
     }
 
