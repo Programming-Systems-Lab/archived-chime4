@@ -7,8 +7,14 @@
 
 package psl.chime4.server.data;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import psl.chime.sienautils.*;	// for FRAX
+import psl.chime.frax.*;	// for FRAX
 import psl.chime4.server.di.*;
-import psl.chime4.server.librarian.LibrarianRequest;
+import psl.chime4.server.librarian.*;
 
 /**
  * The <code>DataServer</code> class represents the central access point for
@@ -21,15 +27,20 @@ import psl.chime4.server.librarian.LibrarianRequest;
  */
 public class DataServer {
 	public static final DIType kDirectoryType = new DIType("LibrarianSearch");
+	private static final ResourceDescriptor[] kZeroResDes =
+		new ResourceDescriptor[0];
 	
 	private boolean mInitialized;
 	private DAOFactory mDAOFactory;
+	private PersistenceBroker mPersistenceBroker;
 	private DirectoryInterface mDirInterface;
 	private DIEventReceiver mDirEventReceiver;
 	
 	public DataServer() {
 		mInitialized = false;
 		mDAOFactory = new JdbcDAOFactory();
+		mPersistenceBroker = 
+			new PersistenceBroker(this, new NaivePersistenceScheme(this));
 		// mDirInterface = (acquire this ref somehow
 		// ...probably passed to constructor...
 		// ...assume that DirectoryInterface is already connected when we get it)
@@ -88,9 +99,99 @@ public class DataServer {
 	 */
 	public void doLibrarianSearch(LibrarianRequest iReq) {
 		// check own data store
+		librarianSearchLocalDataStore(iReq);
 		
-		// send library request URLs to FRAX		
+		// send library request URLs to FRAX
+		librarianSendToFrax(iReq);
 		
-		// send librarian request across network		
+		// send librarian request across network
+		librarianSearchNetworkDataStores(iReq);
 	}
+	
+	private void notifyLibrarianOfResult(LibrarianResult iResult) {
+		// FIXME: Correct and uncomment the following code
+		//        once Peter finishes the librarian API.		
+/*
+		// notify the librarian of the result
+		mLibrarian.addLibrarianResult(iResult);
+*/
+	}
+	
+	private void librarianSearchLocalDataStore(LibrarianRequest iReq) {
+		// get the appropriate DAO from the DAO factory
+		ResourceDescriptorDAO dao = 
+			(ResourceDescriptorDAO) mDAOFactory.getDAO(ResourceDescriptor.class);
+		
+		// carry out the search on the local data store
+		LibrarianResult result = dao.doLibrarianSearch(iReq);
+		notifyLibrarianOfResult(result);
+	}
+	
+	private void librarianSearchNetworkDataStores(LibrarianRequest iReq) {
+		// TODO: Implement directory interface code here
+
+/*
+		// save results to local data store using
+		// some intelligent persistence scheme
+		try {
+			mPersistenceBroker.smartPersistObjects(resultArray);
+		} catch (DataAccessException ex) {
+			throw new RuntimeException("Could not intelligently persist librarian " +
+				"results from network-wide data stores.");
+		}
+
+		notifyLibrarianOfResult(result);
+*/
+ }
+	
+	private void librarianSendToFrax(LibrarianRequest iReq) {
+		URI[] targets = iReq.getURIs();		
+		ResourceDescriptor metadata;
+		LibrarianResult result = new LibrarianResult();
+		List resultList = new ArrayList(30);
+		
+		result.setSourceRequest(iReq);
+		for (int i = 0; i < targets.length; i++) {
+			metadata = queryFrax(targets[i]);	
+			resultList.add(metadata);
+		}
+		
+		ResourceDescriptor[] resultArray = 
+			(ResourceDescriptor[]) resultList.toArray(kZeroResDes);
+		
+		// save results to local data store using
+		// some intelligent persistence scheme
+		try {
+			mPersistenceBroker.smartPersistObjects(resultArray);
+		} catch (DataAccessException ex) {
+			throw new RuntimeException("Could not intelligently persist librarian " +
+				"results from Frax.");
+		}
+		
+		result.setSearchResults(resultArray);
+		notifyLibrarianOfResult(result);
+	}
+	
+	private ResourceDescriptor queryFrax(URI iTarget) {
+		// right now, we need to construct a SienaObject to pass data to FRAX,
+		// which is awful and really disgusting but will have to remain
+		// until we replace it with WellWrittenFrax (tm) in Fall 2002
+		// NOTE: We just use a SienaObject as a container; we're not actually
+		//       putting any data on the Siena bus
+		SienaObject s = new SienaObject(iTarget.getScheme(), iTarget.toString(), 
+			"Chime4DataServer", null, null, null, false);
+						
+		try {
+			FRAXProtLoader fpl = new FRAXProtLoader();
+			String xmlMetadata = fpl.runProtExpectingReturn(s);
+			return resourceDescriptorForXML(xmlMetadata);
+		} catch (Exception ex) {
+			throw new RuntimeException("Error querying FRAX.", ex);
+		}
+	}
+	
+	private ResourceDescriptor resourceDescriptorForXML(String iXML) {
+		// TODO: Implement me		
+		return null;
+	}	
 }
