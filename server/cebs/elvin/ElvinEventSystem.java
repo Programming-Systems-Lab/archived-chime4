@@ -2,7 +2,7 @@ package psl.chime4.server.cebs.elvin;
 
 import psl.chime4.server.cebs.Event;
 import psl.chime4.server.cebs.CebsEventSystem;
-import psl.chime4.server.cebs.CebsException;
+import psl.chime4.server.cebs.CEBSException;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -45,13 +45,13 @@ public class ElvinEventSystem extends CebsEventSystem
     * @param port the port of the event server process
     * @throws IllegalArgumentException
     *         if <code>host</code> is <code>null</code> 
-    * @throws CebsException
+    * @throws CEBSException
     *         if the connection could not be made
     * @throws IllegalStateException
     *         if already connected to the event server
     **/
    protected void openRealConnection(String host, int port) 
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if (host == null)
@@ -82,7 +82,7 @@ public class ElvinEventSystem extends CebsEventSystem
       catch (Exception e)
       {
          String msg = "could not connect to server: " + host + ":" + port;
-         throw new CebsException(msg, e);
+         throw new CEBSException(msg, e);
       }
    }
        
@@ -138,14 +138,14 @@ public class ElvinEventSystem extends CebsEventSystem
     *         if any parameter is <code>null</code>
     * @throws IllegalStateException 
     *         if no connection to the server exists
-    * @throws CebsException
+    * @throws CEBSException
     *         if the exception could not be sent
     * @throws ClassCastException
     *         if the event is not an Elvin event
     **/
    protected void sendEvent(String host, int port, String topic, 
                             Event event) 
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if ((host == null) || (topic == null) || (event == null))
@@ -181,7 +181,7 @@ public class ElvinEventSystem extends CebsEventSystem
       } catch (Exception e)
       {
          String msg = "could not send event to server: " + host + ":" + port;
-         throw new CebsException(msg, e);
+         throw new CEBSException(msg, e);
       }
    }
    
@@ -195,11 +195,11 @@ public class ElvinEventSystem extends CebsEventSystem
     *         if <code>host</code> or <code>topic</code> is <code>null</code>
     * @throws IllegalStateException
     *         if no connection exists to the server
-    * @throws CebsException
+    * @throws CEBSException
     *         if the subscription could not be made
     **/
    protected void addSubscription(String host, int port, String topic) 
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if ((host == null) || (topic == null))
@@ -240,7 +240,7 @@ public class ElvinEventSystem extends CebsEventSystem
       } catch (Exception e)
       {
          String msg = "could not send event to: " + host + "," + port;
-         throw new CebsException(msg, e);
+         throw new CEBSException(msg, e);
       }
    }
    
@@ -254,11 +254,11 @@ public class ElvinEventSystem extends CebsEventSystem
     *         if <code>host</code> or <code>topic</code> is <code>null</code>
     * @throws IllegalStateException
     *         if no connection the server exists
-    * @throws CebsException
+    * @throws CEBSException
     *         if the subscription could not be removed
     **/
    protected void removeSubscription(String host, int port, String topic)
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if ((host == null) || (topic == null))
@@ -288,7 +288,7 @@ public class ElvinEventSystem extends CebsEventSystem
       } catch (Exception e)
       {
          String msg = "cannot remove subscription";
-         throw new CebsException(msg, e);
+         throw new CEBSException(msg, e);
       }
    }
    

@@ -48,10 +48,10 @@ public abstract class CebsEventSystem
     * @param port the port of the event server
     * @throws IllegalArgumentException
     *         if <code>host</code> is <code>null</code>
-    * @throws CebsException
+    * @throws CEBSException
     *         if the connection could not be opened
     **/
-   public void openConnection(String host, int port) throws CebsException
+   public void openConnection(String host, int port) throws CEBSException
    {
       // check for null
       if (host == null)
@@ -82,13 +82,13 @@ public abstract class CebsEventSystem
     *
     * @param host host of the event server process to connect to
     * @param port port of the event server process to connect to
-    * @throws CebsException
+    * @throws CEBSException
     *         if the connection cannot be made
     * @throws IllegalStateException
     *         if a connection to the server already exists
     **/
    protected abstract void openRealConnection(String host, int port) 
-      throws CebsException;
+      throws CEBSException;
    
    /**
     * Close a connection to a server. This method should be called after the
@@ -149,11 +149,11 @@ public abstract class CebsEventSystem
     *         if any parameter is <code>null</code>
     * @throws IllegalStateException
     *         if no connection to the server exists
-    * @throws CebsException
+    * @throws CEBSException
     *         if the event cannot be published
     **/
    public void publish(String host, int port, String topic, Event event)
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if ((host == null) || (topic == null) || (event == null))
@@ -181,11 +181,11 @@ public abstract class CebsEventSystem
     * @param port  port of the event server process
     * @param topic topic to publish the event under
     * @param event event to actually send
-    * @throws CebsException
+    * @throws CEBSException
     *         if the event cannot be sent
     **/
    protected abstract void sendEvent(String host, int port, String topic, 
-                                     Event event) throws CebsException;
+                                     Event event) throws CEBSException;
    
    
    /**
@@ -201,12 +201,12 @@ public abstract class CebsEventSystem
     *         if any parameter is <code>null</code>
     * @throws IllegalStateException
     *         if no connection was made to server
-    * @throws CebsException
+    * @throws CEBSException
     *         if the subscription could not be made
     **/
    public void registerEventHandler(String host, int port, String topic, 
                                     EventHandler handler) 
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if ((host == null) || (topic == null) || (handler == null))
@@ -237,12 +237,12 @@ public abstract class CebsEventSystem
     * @param host  the event server
     * @param port  port of the event server
     * @param topic topic to subscribe too
-    * @throws CebsException
+    * @throws CEBSException
     *         if the subscription cannot be made
     **/
    protected abstract void addSubscription(String host, int port, 
                                            String topic) 
-      throws CebsException;
+      throws CEBSException;
    
    /**
     * Unregister an event handler that no longer wants to subscribe to a 
@@ -253,11 +253,11 @@ public abstract class CebsEventSystem
     * @param topic the topic to unsubscribe from
     * @throws IllegalArgumentException
     *         if any parameter is <code>null</code>
-    * @throws CebsException
+    * @throws CEBSException
     *         if the subscription to the event server cannot be undone
     **/
    public void unregisterEventHandler(String host, int port, String topic)
-      throws CebsException
+      throws CEBSException
    {
       // check for null
       if ((host == null) || (topic == null))
@@ -288,12 +288,12 @@ public abstract class CebsEventSystem
     * @param host  the host of the event server
     * @param port  the port of the event server process
     * @param topic the topic to unsubscribe from
-    * @throws CebsException
+    * @throws CEBSException
     *         if the subscription cannot be removed
     **/
    protected abstract void removeSubscription(String host, int port, 
                                               String topic) 
-      throws CebsException;
+      throws CEBSException;
    
    /**
     * Get an EventHandler subscribed to a topic on a given host.
