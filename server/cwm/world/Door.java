@@ -1,4 +1,4 @@
-package psl.chime4.server.cwm;
+package psl.chime4.server.cwm.world;
 
 /**
  * A door represents a connection from one room to another.

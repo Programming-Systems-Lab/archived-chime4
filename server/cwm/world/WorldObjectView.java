@@ -1,4 +1,4 @@
-package psl.chime4.server.cwm;
+package psl.chime4.server.cwm.world;
 
 /**
  * A WorldObjectView represents a view of an object in the world, literally

@@ -1,4 +1,4 @@
-package psl.chime4.server.cwm;
+package psl.chime4.server.cwm.world;
 
 /**
  * A LocatableWorldObjectView is a view of an object that has a location and

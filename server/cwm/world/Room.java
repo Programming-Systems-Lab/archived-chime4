@@ -1,4 +1,4 @@
-package psl.chime4.server.cwm;
+package psl.chime4.server.cwm.world;
 
 import psl.chime4.server.data.ResourceDescriptor;
 

@@ -1,4 +1,4 @@
-package psl.chime4.server.cwm;
+package psl.chime4.server.cwm.world;
 
 /**
 * A WorldObject represents an actual object that exists in the world. This 
