@@ -119,7 +119,15 @@ public class User implements Persistent {
     public int getValidServices() {
 	return validServices;
     }
-
+		
+		/**
+		 * Sets the valid network services that this user is allowed to provide.
+		 * This method exists primarily to facilitate object persistence; client
+		 * code should generally call <code>addValidService</code> to add service
+		 * capabilities one by one.
+		 */
+		public void setValidServices(int services) {
+		}
 
 
     /**

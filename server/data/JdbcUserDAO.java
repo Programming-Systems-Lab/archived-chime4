@@ -8,6 +8,7 @@
 package psl.chime4.server.data;
 
 import java.sql.*;
+import psl.chime4.server.auth.User;
 import psl.chime4.server.data.sql.*;
 
 /**
@@ -64,22 +65,6 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 		}		
 	}
 
-	private String buildCreateUsersTableStatement() {
-		// table columns...
-		String[] columns = {
-			kColUsersID, kColUsersUserName, kColUsersPassword,
-			kColUsersPublicKey, kColUsersAccessModes
-		};
-		
-		// ...and their corresponding types
-		String[] types = {
-			"integer PRIMARY KEY", "varchar(200)", "varchar(200)",
-			"varbinary(4096)", "integer"
-		};
-		
-		return SqlHelper.create(kTableUsers, columns, types);
-	}	
-	
 	/**
 	 * Loads the persistent object with the given ID from the
 	 * backing data store.
@@ -90,17 +75,66 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 	 * due to a failure in the backing store
 	 */
 	public Persistent load(int iID) throws DataAccessException {
-		return null;
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		// milk the connection source
+		conn = getConnection();
+				
+		// load the User
+		try {
+			stmt = conn.createStatement();			
+			rs = stmt.executeQuery(buildLoadUserQuery(iID));			
+			rs.next();
+			
+			// instantiate an empty User object
+			User u = new User();
+			
+			// copy values from the result set into the User object
+			u.setPersistenceID(iID);
+			u.setUserID(rs.getString(kColUsersUserName));
+			u.setPassword(rs.getString(kColUsersPassword));
+			u.setPublicKey(rs.getBytes(kColUsersPublicKey));
+			u.setValidServices(rs.getInt(kColUsersAccessModes));
+			
+			return u;
+		} catch (SQLException ex) {			
+			throw new
+				DataAccessException("Error loading User.", ex);
+		} finally {
+			cleanUp(conn, stmt, rs);
+		}
 	}
 	
 	/**
 	 * Saves the given persistent object to the backing data store.
 	 *
-	 * @param iR the persistent object to save
+	 * @param iP the persistent object to save
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
-	public void store(Persistent iR) throws DataAccessException {
+	public void store(Persistent iP) throws DataAccessException {
+		// ClassCastException will be thrown here if cast fails
+		User u = (User) iP;		
+		
+		Connection conn = null;
+		Statement stmt = null;
+		
+		// get a connection
+		conn = getConnection();
+				
+		try {
+			stmt = conn.createStatement();
+			
+			// store user
+			stmt.executeUpdate(buildStoreUserStatement(u));
+		} catch (SQLException ex) {			
+			throw new
+				DataAccessException("Error storing resource descriptor.", ex);
+		} finally {
+			cleanUp(conn, stmt, null);
+		}
 	}
 	
 	/**
@@ -123,4 +157,53 @@ public class JdbcUserDAO extends AbstractJdbcDAO
 	 */
 	public void delete(int iID) throws DataAccessException {
 	}
+
+	// query/statement builders -- methods that neatly assemble the SQL
+	// statements that we're sending to the DB
+	private String buildCreateUsersTableStatement() {
+		// table columns...
+		String[] columns = {
+			kColUsersID, kColUsersUserName, kColUsersPassword,
+			kColUsersPublicKey, kColUsersAccessModes
+		};
+		
+		// ...and their corresponding types
+		String[] types = {
+			"integer PRIMARY KEY", "varchar(200)", "varchar(200)",
+			"varbinary(4096)", "integer"
+		};
+		
+		return SqlHelper.create(kTableUsers, columns, types);
+	}	
+
+	private String buildLoadUserQuery(int iID) {
+		String[] columns = {
+			kColUsersUserName, kColUsersPassword,
+			kColUsersPublicKey, kColUsersAccessModes
+		};
+
+		String whereClause = (new StringBuffer(kColUsersID)).append(" = ")
+			.append(iID).toString();
+		
+		return SqlHelper.select(columns, kTableUsers, whereClause);
+	}
+
+	private String buildStoreUserStatement(User iU) {
+		String[] columns = {
+			kColUsersUserName, kColUsersPassword,
+			kColUsersPublicKey, kColUsersAccessModes
+		};
+		
+		String[] values = {
+			SqlHelper.prepareString(iU.getUserID()),
+			SqlHelper.prepareString(iU.getPassword()),
+			SqlHelper.wrapInQuotes(new String(iU.getPublicKey())),
+			String.valueOf(iU.getValidServices())
+		};
+		
+		String whereClause = (new StringBuffer(kColUsersID)).append(" = ")
+			.append(iU.getPersistenceID()).toString();
+		
+		return SqlHelper.update(kTableUsers, columns, values, whereClause);
+	}	
 }
