@@ -1,17 +1,18 @@
 #ifndef __ENVIRONMENT_MODELER_MODEL__
 #define __ENVIRONMENT_MODELER_MODEL__
 
-class EMModel
+#include "ChimeID.h"
+#include "EMHash.h"
+
+class EMModel: public EMHash
 {
 	public:
 		EMModel( char *file, ChimeID setID );
 		~EMModel( void );
 
 		ChimeID modelID;
-		char *modelData;
+		void *modelData;
 		unsigned int modelDataLength;
-
-		class EMModel *hashNext;
 };
 
 #endif

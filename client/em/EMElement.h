@@ -3,25 +3,25 @@
 
 //dependencies
 #include "ChimeID.h"
-
+#include "EMCoords.h"
+#include "EMHash.h"
+#include "EMModel.h"
 
 //element definition
-class EMElement
+class EMElement: public EMHash
 {
 	public:
-		virtual EMElement( ChimeID setID );
+		EMElement( ChimeID setID, Coords setDim, ChimeID modelID );
 		virtual ~EMElement( void );
 
-		void setModel( ChimeID modelID );
+		void setModel( ChimeID setModelID );
 	
-		class EMElement *hashNext;
 		ChimeID elementID;
-		ChimeID modelID;
 		EMModel *model;
 		Coords dimensions;
 
 	private:
 		EMElement( void );
-}
+};
 
 #endif
