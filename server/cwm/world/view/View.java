@@ -1,7 +1,12 @@
 package psl.chime4.server.cwm.world.view;
 
-import psl.chime4.server.cwm.AbstractPersistentObject;
-import psl.chime4.server.cwm.world.WorldObject;
+import psl.chime4.server.cwm.world.persist.PersistentObject;
+import psl.chime4.server.cwm.world.persist.Cacheable;
+import psl.chime4.server.cwm.world.persist.ObjectID;
+
+import psl.chime4.server.cwm.world.wms.WorldObject;
+
+import java.io.Serializable;
 
 /**
  * A View represents how an object looks in the world.
@@ -9,13 +14,14 @@ import psl.chime4.server.cwm.world.WorldObject;
  * @author Azubuko Obele
  * @version 0.1
  **/
-public abstract class View extends AbstractPersistentObject
+public abstract class View extends PersistentObject 
+   implements Cacheable, Serializable
 {
    /** uri defining the view's model file **/
    private String modelURI;
    
-   /** the world object the view is displaying **/
-   private WorldObject worldObject;
+   /** the id of the world object the view is displaying **/
+   private ObjectID worldObject;
    
    /**
     * Get the model URI associated with this view.
@@ -38,11 +44,11 @@ public abstract class View extends AbstractPersistentObject
    }
    
    /**
-    * Get the WorldObject associated with this view.
+    * Get the id of the WorldObject associated with this view.
     *
-    * @return WorldObject associated with this view or <code>null</code>
+    * @return object id of the world object owned by this view
     **/
-   public WorldObject getWorldObject()
+   public ObjectID getWorldObject()
    {
       return worldObject;
    }
@@ -50,10 +56,19 @@ public abstract class View extends AbstractPersistentObject
    /**
     * Set the WorldObject associated with this view.
     *
-    * @param worldObj WorldObject this view will display
+    * @param worldObj id of the WorldObject this view will display
+    * @throws IllegalArgumentException
+    *         if <code>worldObj</code> is not owned by a world object
     **/
-   public void setWorldObject(WorldObject worldObj)
+   public void setWorldObject(ObjectID worldObj)
    {
+      if ((worldObj != null) && 
+          (worldObj.getOwnerType() != WorldObject.class))
+      {
+         String msg = "views can only be applied to world objects";
+         throw new IllegalArgumentException(msg);
+      }
+      
       this.worldObject = worldObj;
    }
 }

@@ -1,5 +1,7 @@
 package psl.chime4.server.cwm.world.view;
 
+import psl.chime4.server.cwm.world.persist.ObjectID;
+
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,12 +93,20 @@ public class RoomView extends View
    /**
     * Add a view of a door that leads from this room to another.
     *
-    * @param doorView door view to add to the room
+    * @param doorView object id of the door view to add to the room
+    * @throws IllegalArgumentException
+    *         if <code>doorView</code> is not owned by a {@link DoorView}
     **/
-   public void addDoorView(DoorView doorView)
+   public void addDoorView(ObjectID doorView)
    {
       if (doorView != null)
       {
+         if (doorView.getOwnerType() != DoorView.class)
+         {
+            String msg = "only door views can be added to rooms";
+            throw new IllegalArgumentException(msg);
+         }
+         
          if (doorViews == null)
          {
             doorViews = new HashSet();
@@ -109,9 +119,9 @@ public class RoomView extends View
    /**
     * Remove a given view of a door from the room.
     *
-    * @param doorView door view to remove from the room
+    * @param doorView object id of the door view to remove from the room
     **/
-   public void removeDoorView(DoorView doorView)
+   public void removeDoorView(ObjectID doorView)
    {
       if (doorView != null)
       {
@@ -147,12 +157,21 @@ public class RoomView extends View
    /**
     * Add a view for an object that's in the room.
     *
-    * @param view view of an object that's in the room
+    * @param view object id of a view of an object that's in the room
+    * @throws IllegalArgumentException
+    *         if <code>view</code> doesn't belong to an object of type 
+    *         {@link View}
     **/
-   public void addContentView(View view)
+   public void addContentView(ObjectID view)
    {
       if (view != null)
       {
+         if (view.getOwnerType() != View.class)
+         {
+            String msg = "only views can be added to rooms";
+            throw new IllegalArgumentException(msg);
+         }
+         
          if (contentsViews == null)
          {
             contentsViews = new HashSet();
