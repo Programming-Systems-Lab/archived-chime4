@@ -113,9 +113,6 @@ public class WorldService extends AbstractService
       world.setWorldService(this);
       world.setPersistenceService(persistenceService);
       world.initialize();
-      
-      // create the default theme
-      defaultTheme = new Theme();
    }
    
    /**
@@ -125,14 +122,6 @@ public class WorldService extends AbstractService
     *        if the service cannot start for some reason
     */
    public void start() throws ServiceException
-   {
-   }
-   
-   /**
-    * Shut the Service down. The Service has roughly two minutes to shutdown
-    * before it will be forcefully shutdown.
-    */
-   public void stop()
    {
    }
 }

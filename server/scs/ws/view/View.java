@@ -1,8 +1,5 @@
 package psl.chime4.server.scs.ws.view;
 
-import psl.chime4.server.scs.persist.*;
-import psl.chime4.server.scs.ws.data.*;
-import psl.chime4.server.scs.ws.view.render.*;
 
 /**
  * Represents what an object looks like in the world. This class can also

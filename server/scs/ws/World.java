@@ -58,24 +58,6 @@ public final class World extends PersistentObject
    }
    
    /**
-    * Put a WorldObject in the map mapped to its object id.
-    *
-    * @param wobj to put into the map
-    * @throws IllegalArgumentException
-    *         if <code>oid</code> is <code>null</code>
-    **/
-   public void putWorldObject(WorldObject wobj)
-   {
-      if (wobj == null)
-      {
-         String msg = "wobj cannot be null";
-         throw new IllegalArgumentException(msg);
-      }
-      
-      instanceMap.put(wobj.getObjectID(), wobj);
-   }
-   
-   /**
     * Set the WorldService that manages this object.
     *
     * @param wService WorldService that manages this object
