@@ -1,6 +1,8 @@
 
 package psl.chime4.zone;
 
+import java.io.*;
+import psl.chime4.server.auth.AuthTicket;
 import psl.chime4.server.auth.NetworkNode;
 
 
@@ -22,6 +24,56 @@ import psl.chime4.server.auth.NetworkNode;
 public class ZoneServer {
 
 
+    private String username = null;   // network-level user id
+    private AuthTicket localAuth = null;  // local authentication ticket
+
+    private Thread serverThread;
+    private boolean runThread;
+
+
+
+
+
+    /**
+     * Starts a new zone server as its own Java process
+     **/
+    public static void main(String[] argv) {
+
+	// Load up and run our zone server
+	ZoneServer server = new ZoneServer();
+	server.startZoneServer();
+	System.out.println("Zone server running.");
+
+
+	// Stop the server when the keyboard user presses enter
+	System.out.println("Press [enter] to stop.");
+	BufferedReader in = new BufferedReader(new 
+	    InputStreamReader(System.in));
+	try {
+	    in.readLine();
+	} 
+	catch (IOException e) {
+	    e.printStackTrace();
+	}
+
+	server.stopZoneServer();
+    }
+
+
+
+
+
+    /**
+     * Creates a new zone server. Duh!
+     **/
+    public ZoneServer() {
+	serverThread = null;
+	runThread = true;
+    }
+
+
+
+
 
     /**
      * Starts zone service on the local machine.  A CHIME server calls
@@ -30,6 +82,12 @@ public class ZoneServer {
      * this service from the rest of the network.
      **/
     public void startZoneServer() {
+	serverThread = new Thread() {
+		public void run() {
+		    processNetworkEvents();
+		}
+	    };
+	serverThread.start();
     }
 
 
@@ -44,6 +102,7 @@ public class ZoneServer {
      * CHIME worlds, etc.) to its peers before shutting down service.
      **/
     public void stopZoneServer() {
+	runThread = false;
     }
 
 
@@ -59,6 +118,9 @@ public class ZoneServer {
      * information on the other thread).
      **/
     private void processNetworkEvents() {
+	while (runThread) {
+	    try {new Thread().sleep(1000);} catch (Exception e) {}
+	}
     }
 
 
@@ -147,9 +209,5 @@ public class ZoneServer {
 
 
 } // end ZoneServer class
-
-
-
-
 
 

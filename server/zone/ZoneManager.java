@@ -168,10 +168,12 @@ public class ZoneManager {
 	//         (PeerCommunicator.REJECT_ZONE_TRANSFER, zoneServer);
 	//	}
 
+
+	// Accept transfer request
 	if (zoneServer.equals(zoneSettings.getNextNeighbor()))
-	    zoneSettings.addPrimaryZones(list, false); // add at end
+	    zoneSettings.addPrimaryZones(list, false); // add to end
 	else
-	    zoneSettings.addPrimaryZones(list, true);  // add at beginning
+	    zoneSettings.addPrimaryZones(list, true);  // add to beginning
 
 	PeerCommunicator.sendMessage(PeerCommunicator.ACCEPT_ZONE_TRANSFER,
 				     zoneServer);
@@ -233,12 +235,9 @@ public class ZoneManager {
     public void splitZone(Zone zone) {
 
 	if (zoneSettings.hasPrimaryZone(zone)) {
+	    // Split and update zone settings as appropriate
 	    dataManager.describeZoneOrganization();
 	}
-	// 1) Check if zone is in primary coverage
-	// 2) Split & rename and update coverage list in zoneSettings
-	// 3) Have the data manager figure out who is in what new zone
-	//    (from the old zone) and tell them their new zone
     }
 
 
@@ -256,27 +255,19 @@ public class ZoneManager {
      *                       are not sequential, nothing is done
      **/
     public void mergeZones(Zone zone1, Zone zone2) {
-	// 1) Check that zone1 and zone2 appear in primary next to each other
-	// 2) Merge together with new name and update primary list
-	// 3) Using data manager, communicate to users in both zones their
-	//    new zone name.
+
+	if (zoneSettings.hasPrimaryZone(zone1) &&
+	    zoneSettings.hasPrimaryZone(zone2)) {
+
+	    // 1) Check that zone1 and zone2 neighbor each other directly
+	    // 2) Merge together however this needs to be done
+	    dataManager.describeZoneOrganization();
+	}
     }
 
 
 
 } // end ZoneManager class
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -182,5 +182,39 @@ public class NetworkNode {
 
 
 
-} // end NetworkNode class
+    /**
+     * Returns true if the current network node is equivalent to the specified
+     * node.  Two network nodes are equivalent if
+     *
+     *    1) they have the same username
+     *    2) failing 1, they have the same IP address
+     **/
+    public boolean equals(NetworkNode n) {
 
+	if (n == null)
+	    return false;
+
+	// Check user name
+	String username = n.getUsername();
+	if (username != null) {
+	    if (username.equals(this.getUsername()))
+		return true;
+	    else
+		return false;
+	}
+
+	// Check IP address
+	else {
+	    String ipaddress = n.getIPAddress();
+	    if ((ipaddress != null) && (ipaddress.equals(this.getIPAddress())))
+		return true;
+	    else
+		return false;
+	}
+
+    }
+
+
+
+
+} // end NetworkNode class
