@@ -8,7 +8,7 @@
 package psl.chime4.server.data;
 
 /**
- * Manages the persistence of <code>Persistable</code> objects.
+ * Manages the persistence of <code>Persistent</code> objects.
  * Concrete implementations of this interface will communicate with some kind
  * of underlying data store.  However, if client code is written to the
  * interface and not to the implementation, the user shouldn't care what the
@@ -24,38 +24,38 @@ package psl.chime4.server.data;
  */
 public interface DataAccessObject {
 	/**
-	 * Loads the persistable object with the given ID from the
+	 * Loads the persistent object with the given ID from the
 	 * backing data store.
 	 *
 	 * @param iID the ID
-	 * @return the loaded persistable object
+	 * @return the loaded persistent object
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
-	public Persistable load(int iID) throws DataAccessException;
+	public Persistent load(int iID) throws DataAccessException;
 	
 	/**
-	 * Saves the given persistable object to the backing data store.
+	 * Saves the given persistent object to the backing data store.
 	 *
-	 * @param iR the persistable object to save
+	 * @param iR the persistent object to save
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
-	public void store(Persistable iR) throws DataAccessException;
+	public void store(Persistent iR) throws DataAccessException;
 	
 	/**
-	 * Creates a persistable object in the backing data store.
+	 * Creates a persistent object in the backing data store.
 	 *
-	 * @return the ID that uniquely identifies the created persistable object
+	 * @return the ID that uniquely identifies the created persistent object
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
 	public int create() throws DataAccessException;
 
 	/**
-	 * Deletes a persistable object from the backing data store.
+	 * Deletes a persistent object from the backing data store.
 	 *
-	 * @param iID the ID that uniquely identifies the persistable object
+	 * @param iID the ID that uniquely identifies the persistent object
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */

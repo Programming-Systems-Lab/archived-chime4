@@ -21,27 +21,27 @@ import psl.chime4.server.vem.*;
  * @author Mark Ayzenshtat 
  */
 public class JdbcDAOFactory implements DAOFactory {
-	// a mapping of Persistable subclasses to DataAccessObject instances
+	// a mapping of Persistent subclasses to DataAccessObject instances
 	private Map mDAOClassMap;
 	
 	// package-scope constructor
 	JdbcDAOFactory() {
 		mDAOClassMap = new HashMap(20);
 		
-		bindPersistableToDAO(ResourceDescriptor.class,
+		bindPersistentToDAO(ResourceDescriptor.class,
 			JdbcResourceDescriptorDAO.class);
 		
-		bindPersistableToDAO(VemMap.class, JdbcVemMapDAO.class);
+		bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
 	}
 	
 	/**
-	 * Binds a class of <code>Persistable</code> objects to a class of
+	 * Binds a class of <code>Persistent</code> objects to a class of
 	 * <code>DataAccessObject</code> instances.
 	 *
-	 * @param iPersistableClass the class of Persistable objects
+	 * @param iPersistentClass the class of Persistent objects
 	 * @param iDAOClass the class of DataAccessObject instances
 	 */
-	public void bindPersistableToDAO(Class iPersistableClass, Class iDAOClass) {
+	public void bindPersistentToDAO(Class iPersistentClass, Class iDAOClass) {
 		DataAccessObject dao;
 		
 		// instantiate the DAO
@@ -58,32 +58,41 @@ public class JdbcDAOFactory implements DAOFactory {
 		}
 		
 		// put the DAO instance in the map		
-		mDAOClassMap.put(iPersistableClass, dao);
+		mDAOClassMap.put(iPersistentClass, dao);
 	}
 	
 	/**
 	 * Retrieves a valid <code>DataAccessObject</code> instance that manages
-	 * the supplied class of <code>Persistable</code> objects.
+	 * the supplied class of <code>Persistent</code> objects.
 	 *
+	 * @param iPersistentClass the class of <code>Persistent</code> objects
+	 * that the returned <code>DataAccessObject</code> manages
+	 * @param iCached should the returned <code>DataAccessObject</code>
+	 * cache its contents in local memory?
 	 * @return a valid <code>DataAccessObject</code> instance	 
 	 * @exception IllegalArgumentException if the supplied class does not
-	 * inherit from <code>Persistable</code>
+	 * inherit from <code>Persistent</code>
 	 * @exception IllegalArgumentException if this <code>DAOFactory</code>
-	 * does not have any account of the supplied class of <code>Persistable
+	 * does not have any account of the supplied class of <code>Persistent
 	 * </code>objects
+	 * @see CachedDAO
 	 */
-	public DataAccessObject getDAO(Class iPersistableClass) {
-		if (!Persistable.class.isAssignableFrom(iPersistableClass)) {
+	public DataAccessObject getDAO(Class iPersistentClass, boolean iCached) {
+		if (!Persistent.class.isAssignableFrom(iPersistentClass)) {
 			throw new java.lang.IllegalArgumentException(
-				"Supplied class must inherit from Persistable.");
+				"Supplied class must inherit from Persistent.");
 		}
 		
 		DataAccessObject dao = (DataAccessObject) 
-			mDAOClassMap.get(iPersistableClass);
+			mDAOClassMap.get(iPersistentClass);
 		
 		if (dao == null) {
 			throw new IllegalArgumentException("No record of class: " + 
-				iPersistableClass);
+				iPersistentClass);
+		}
+		
+		if (iCached) {
+			dao = new CachedDAO(dao);
 		}
 		
 		return dao;

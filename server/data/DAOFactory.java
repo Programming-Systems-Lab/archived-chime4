@@ -15,23 +15,28 @@ package psl.chime4.server.data;
 public interface DAOFactory {
 	/**
 	 * Retrieves a valid <code>DataAccessObject</code> instance that manages
-	 * the supplied class of <code>Persistable</code> objects.
+	 * the supplied class of <code>Persistent</code> objects.
 	 *
+	 * @param iPersistentClass the class of <code>Persistent</code> objects
+	 * that the returned <code>DataAccessObject</code> manages
+	 * @param iCached should the returned <code>DataAccessObject</code>
+	 * cache its contents in local memory?
 	 * @return a valid <code>DataAccessObject</code> instance	 
 	 * @exception IllegalArgumentException if the supplied class does not
-	 * inherit from <code>Persistable</code>
+	 * inherit from <code>Persistent</code>
 	 * @exception IllegalArgumentException if this <code>DAOFactory</code>
-	 * does not have any account of the supplied class of <code>Persistable
+	 * does not have any account of the supplied class of <code>Persistent
 	 * </code>objects
+	 * @see CachedDAO
 	 */
-	public DataAccessObject getDAO(Class iPersistableClass);
+	public DataAccessObject getDAO(Class iPersistentClass, boolean iCached);
 	
 	/**
-	 * Binds a class of <code>Persistable</code> objects to a class of
+	 * Binds a class of <code>Persistent</code> objects to a class of
 	 * <code>DataAccessObject</code> instances.
 	 *
-	 * @param iPersistableClass the class of Persistable objects
+	 * @param iPersistentClass the class of Persistent objects
 	 * @param iDAOClass the class of DataAccessObject instances
 	 */
-	public void bindPersistableToDAO(Class iPersistableClass, Class iDAOClass);
+	public void bindPersistentToDAO(Class iPersistentClass, Class iDAOClass);
 }

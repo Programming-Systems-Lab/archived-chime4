@@ -66,7 +66,7 @@ public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
 	 */
-	public Persistable load(int iID) throws DataAccessException {
+	public Persistent load(int iID) throws DataAccessException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -125,10 +125,10 @@ public class JdbcResourceDescriptorDAO implements ResourceDescriptorDAO {
 	 * @param iP the resource descriptor to save
 	 * @exception DataAccessException if this operation cannot complete
 	 * due to a failure in the backing store
-	 * @exception ClassCastException if the supplied <code>Persistable</code>
+	 * @exception ClassCastException if the supplied <code>Persistent</code>
 	 * object is not a <code>ResourceDescriptor</code>
 	 */
-	public void store(Persistable iP) throws DataAccessException {
+	public void store(Persistent iP) throws DataAccessException {
 		// ClassCastException will be thrown here if cast fails
 		ResourceDescriptor r = (ResourceDescriptor) iP;
 		

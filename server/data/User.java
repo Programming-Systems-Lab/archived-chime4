@@ -14,7 +14,7 @@ package psl.chime4.server.data;
  * @version 1.0
  */
 
-public class User implements Persistable {
+public class User implements Persistent {
 	private static final String kZeroString = "";
 	public static final int GLOBAL_ID = 0;
 

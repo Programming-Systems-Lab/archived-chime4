@@ -17,7 +17,7 @@ import java.util.Date;
  *
  * @author Mark Ayzenshtat
  */
-public abstract class ResourceDescriptor implements Persistable {
+public abstract class ResourceDescriptor implements Persistent {
 	private static final Date kZeroDate = new Date(0);
 	private static final String kZeroString = "";
 	

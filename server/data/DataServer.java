@@ -39,7 +39,7 @@ public class DataServer {
 	
 	/**
 	 * Retrieves this data server's DAO factory.  The DAO factory enables client
-	 * code to obtain data access objects with which to read/write persistable
+	 * code to obtain data access objects with which to read/write persistent
 	 * objects from/to the underlying data store.
 	 *
 	 * @return this data server's DAO factory
