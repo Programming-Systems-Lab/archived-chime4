@@ -5,10 +5,10 @@ import java.io.*;
 import java.util.*;
 
 import psl.chime4.server.di.*;
-import psl.chime4.server.auth.AuthTicket;
-import psl.chime4.server.auth.NetworkNode;
+import psl.chime4.server.auth.*;
 import psl.chime4.server.util.StringParser;
 import psl.chime4.server.zone.authority.*;
+import psl.chime4.server.zone.metrics.*;
 import psl.chime4.server.zone.schemes.*;
 
 
@@ -42,8 +42,10 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
     private DataManager dataManager;
     private ZoneManager zoneManager;
 
-    private ZoneChangeAuthority zoneControl;
+    private ZoneAuthority zoneControl;
     private BackupAuthority backupControl;
+    private NetworkAuthority networkControl;
+    private NetworkMetrics metrics;
 
     private DirectoryInterface di;  // network communication interface
 
@@ -92,8 +94,10 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 	di = null; // INTEGRATE: NEED TO SET DIRECTORY INTERFACE HERE
 
-	zoneControl = new DefaultZoneChangeAuthority(zoneManager, di);
+	zoneControl = new DefaultZoneAuthority(zoneManager, di);
 	backupControl = new DefaultBackupAuthority(zoneManager,dataManager,di);
+	metrics = null;
+	networkControl = new DefaultNetworkAuthority(metrics);
 
     }
 
@@ -136,15 +140,17 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
     /**
-     * Listens for incoming network events and calls appropriate methods,
-     * issues appropriate responses, etc. as necessary.  This is the
-     * zone server's "main" method.  It runs continously and directs the
-     * general behavior of the server.  This method directs one of two
-     * threads that run a zone server (see the monitorNetwork method for
-     * information on the other thread).
+     * Continously analyzes the zone server's network load as well as 
+     * load across its peers.  Based on this information, adjusts
+     * responsibilities as deemed appropriate.  This may involve
+     * adding new zone servers to the network, removing existing zone
+     * servers, accepting extra zone responsibility, or offsetting current
+     * zone responsibility.  This is the zone server's "main method" for
+     * network balancing, and runs in its own thread.
      **/
     private void runMainThread() {
 	while (runThread) {
+	    networkControl.monitorNetwork();
 	    try {new Thread().sleep(1000);} catch (Exception e) {}
 	}
     }
@@ -165,8 +171,10 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 	else if (msg.getType().equals(TRANSFER_ZONE)) { 
 	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
-	    NetworkNode pn=(NetworkNode) retrieveObject(data, SET_PREVIOUS_NEIGHBOR);
-	    NetworkNode nn = (NetworkNode) retrieveObject(data, SET_NEXT_NEIGHBOR);
+	    NetworkNode pn=(NetworkNode) retrieveObject(data, 
+							SET_PREVIOUS_NEIGHBOR);
+	    NetworkNode nn = (NetworkNode) retrieveObject(data, 
+							  SET_NEXT_NEIGHBOR);
 	    zoneControl.handleZoneTransferRequest(list, source, pn, nn);
 	}
 	else if (msg.getType().equals(REJECT_ZONE_TRANSFER)) {
@@ -177,7 +185,6 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 	    Zone[] list = (Zone[]) retrieveObject(data, ZONE_LIST);
 	    zoneControl.handleZoneTransferAcceptance(list, source);
 	}
-	
 	
 	
 	else if (msg.getType().equals(REQUEST_PRIMARY_BACKUP)) {
@@ -227,22 +234,6 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
     /**
-     * Continously analyzes the zone server's network load as well as 
-     * load across its peers.  Based on this information, adjusts
-     * responsibilities as deemed appropriate.  This may involve
-     * adding new zone servers to the network, removing existing zone
-     * servers, accepting extra zone responsibility, or offsetting current
-     * zone responsibility.  This is the zone server's "main method" for
-     * network balancing, and runs in its own thread.
-     **/
-    private void monitorNetwork() {
-    }
-
-
-
-
-
-    /**
      * Searches across the network for current CHIME servers that are
      * eligible to become zone servers, selects one such server, 
      * promotes it to a zone server, and assigns zone responsibility to
@@ -258,56 +249,12 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
     /**
-     * Given a CHIME server that wants to be placed under this server's
-     * zone responsibility, this method handles that request.  Via 
-     * internal criteria, it either a) issues a rejection to the CHIME
-     * server or b) accepts the CHIME server and places it on the Street
-     * under one of the local server's zones.
+     * Given a serialized object stored in a hashtable, retrieves that
+     * object, deserializes it, and returns the re-instantiated object
      *
-     * @param chimeServer - identification information for a CHIME server
-     *                      that has requested zone coverage from this
-     *                      zone server
+     * @param h - hashtable consisting of string-based serialized objects
+     * @param serialized - hash key for the desired object
      **/
-    private void handleChimeServerRequest(NetworkNode chimeServer) {
-    }
-
-
-
-
-
-    /**
-     * Given a zone server that has lost contact with the rest of the
-     * network, this method internally reconfigures the local server's
-     * settings and zone responsibilities as deemed appropriate.
-     *
-     * @param zoneServer - identification information for a zone server
-     *                     that has lost contact with the network, as
-     *                     decided by the local system.
-     **/
-    private void handleDroppedZoneServer(NetworkNode zoneServer) {
-    }
-
-
-
-
-
-    /**
-     * Given a CHIME server under the local server's zone responsibility that
-     * has lost contact with the network (specifically, has lost contact
-     * with the local server), this method reconfigures internal settings and
-     * network setup as appropriate.
-     *
-     * @param chimeServer - identification information for a CHIME server
-     *                      that has lost contact with the network, as
-     *                      decided by the local system.
-     **/
-    private void handleDroppedChimeServer(NetworkNode chimeServer) {
-    }
-
-
-
-
-
     private static Object retrieveObject(Hashtable h, String serialized) {
 	serialized = (String) h.get(serialized);
 	ByteArrayInputStream stream;
@@ -323,9 +270,3 @@ public class ZoneServer implements DIEventReceiver, MessageDefinitions {
 
 
 } // end ZoneServer class
-
-
-
-
-
-

@@ -6,7 +6,7 @@ import psl.chime4.server.zone.Zone;
 
 
 
-public interface ZoneChangeAuthority {
+public interface ZoneAuthority {
 
     public void handleZoneTransferRequest(Zone[] list, NetworkNode source,
 					  NetworkNode newPrevNeighbor,
@@ -20,4 +20,4 @@ public interface ZoneChangeAuthority {
 
 
 
-} // end ZoneChangeAuthority interface
+} // end ZoneAuthority interface

@@ -4,13 +4,13 @@ package psl.chime4.server.zone.schemes;
 import psl.chime4.server.auth.NetworkNode;
 import psl.chime4.server.di.*;
 import psl.chime4.server.zone.*;
-import psl.chime4.server.zone.authority.ZoneChangeAuthority;
+import psl.chime4.server.zone.authority.ZoneAuthority;
 
 
 
 
 
-public class DefaultZoneChangeAuthority implements ZoneChangeAuthority,
+public class DefaultZoneAuthority implements ZoneAuthority,
 						   MessageDefinitions {
 
     
@@ -19,7 +19,7 @@ public class DefaultZoneChangeAuthority implements ZoneChangeAuthority,
 
 
 
-    public DefaultZoneChangeAuthority(ZoneManager zs, DirectoryInterface di) {
+    public DefaultZoneAuthority(ZoneManager zs, DirectoryInterface di) {
 	this.zoneManager = zs;
 	this.di = di;
     }
@@ -54,5 +54,5 @@ public class DefaultZoneChangeAuthority implements ZoneChangeAuthority,
 
 
 
-}   // end DefaultZoneChangeAuthority class
+}   // end DefaultZoneAuthority class
 
