@@ -37,7 +37,7 @@ public class JdbcDAOFactory implements DAOFactory {
 			JdbcResourceDescriptorDAO.class);
 		
 		// VemMap
-		//bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
+		bindPersistentToDAO(VemMap.class, JdbcVemMapDAO.class);
 		
 		// AuthTicket
 		bindPersistentToDAO(AuthTicket.class, JdbcAuthTicketDAO.class);
